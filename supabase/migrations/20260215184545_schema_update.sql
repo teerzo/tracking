@@ -1,0 +1,1 @@
+-- Schema update migration (no schema changes in this file).

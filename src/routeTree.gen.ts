@@ -9,38 +9,192 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ManageRouteImport } from './routes/manage'
+import { Route as LogoutRouteImport } from './routes/logout'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as HomeRouteImport } from './routes/home'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ManageIndexRouteImport } from './routes/manage.index'
+import { Route as ManageSettingsRouteImport } from './routes/manage.settings'
+import { Route as ManageProjectsRouteImport } from './routes/manage.projects'
+import { Route as ManageInvoicesRouteImport } from './routes/manage.invoices'
+import { Route as ManageContractsRouteImport } from './routes/manage.contracts'
+import { Route as ManageCompaniesRouteImport } from './routes/manage.companies'
 
+const ManageRoute = ManageRouteImport.update({
+  id: '/manage',
+  path: '/manage',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LogoutRoute = LogoutRouteImport.update({
+  id: '/logout',
+  path: '/logout',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HomeRoute = HomeRouteImport.update({
+  id: '/home',
+  path: '/home',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ManageIndexRoute = ManageIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ManageRoute,
+} as any)
+const ManageSettingsRoute = ManageSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => ManageRoute,
+} as any)
+const ManageProjectsRoute = ManageProjectsRouteImport.update({
+  id: '/projects',
+  path: '/projects',
+  getParentRoute: () => ManageRoute,
+} as any)
+const ManageInvoicesRoute = ManageInvoicesRouteImport.update({
+  id: '/invoices',
+  path: '/invoices',
+  getParentRoute: () => ManageRoute,
+} as any)
+const ManageContractsRoute = ManageContractsRouteImport.update({
+  id: '/contracts',
+  path: '/contracts',
+  getParentRoute: () => ManageRoute,
+} as any)
+const ManageCompaniesRoute = ManageCompaniesRouteImport.update({
+  id: '/companies',
+  path: '/companies',
+  getParentRoute: () => ManageRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/home': typeof HomeRoute
+  '/login': typeof LoginRoute
+  '/logout': typeof LogoutRoute
+  '/manage': typeof ManageRouteWithChildren
+  '/manage/companies': typeof ManageCompaniesRoute
+  '/manage/contracts': typeof ManageContractsRoute
+  '/manage/invoices': typeof ManageInvoicesRoute
+  '/manage/projects': typeof ManageProjectsRoute
+  '/manage/settings': typeof ManageSettingsRoute
+  '/manage/': typeof ManageIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/home': typeof HomeRoute
+  '/login': typeof LoginRoute
+  '/logout': typeof LogoutRoute
+  '/manage/companies': typeof ManageCompaniesRoute
+  '/manage/contracts': typeof ManageContractsRoute
+  '/manage/invoices': typeof ManageInvoicesRoute
+  '/manage/projects': typeof ManageProjectsRoute
+  '/manage/settings': typeof ManageSettingsRoute
+  '/manage': typeof ManageIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/home': typeof HomeRoute
+  '/login': typeof LoginRoute
+  '/logout': typeof LogoutRoute
+  '/manage': typeof ManageRouteWithChildren
+  '/manage/companies': typeof ManageCompaniesRoute
+  '/manage/contracts': typeof ManageContractsRoute
+  '/manage/invoices': typeof ManageInvoicesRoute
+  '/manage/projects': typeof ManageProjectsRoute
+  '/manage/settings': typeof ManageSettingsRoute
+  '/manage/': typeof ManageIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/home'
+    | '/login'
+    | '/logout'
+    | '/manage'
+    | '/manage/companies'
+    | '/manage/contracts'
+    | '/manage/invoices'
+    | '/manage/projects'
+    | '/manage/settings'
+    | '/manage/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/home'
+    | '/login'
+    | '/logout'
+    | '/manage/companies'
+    | '/manage/contracts'
+    | '/manage/invoices'
+    | '/manage/projects'
+    | '/manage/settings'
+    | '/manage'
+  id:
+    | '__root__'
+    | '/'
+    | '/home'
+    | '/login'
+    | '/logout'
+    | '/manage'
+    | '/manage/companies'
+    | '/manage/contracts'
+    | '/manage/invoices'
+    | '/manage/projects'
+    | '/manage/settings'
+    | '/manage/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  HomeRoute: typeof HomeRoute
+  LoginRoute: typeof LoginRoute
+  LogoutRoute: typeof LogoutRoute
+  ManageRoute: typeof ManageRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/manage': {
+      id: '/manage'
+      path: '/manage'
+      fullPath: '/manage'
+      preLoaderRoute: typeof ManageRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/logout': {
+      id: '/logout'
+      path: '/logout'
+      fullPath: '/logout'
+      preLoaderRoute: typeof LogoutRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/home': {
+      id: '/home'
+      path: '/home'
+      fullPath: '/home'
+      preLoaderRoute: typeof HomeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +202,78 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/manage/': {
+      id: '/manage/'
+      path: '/'
+      fullPath: '/manage/'
+      preLoaderRoute: typeof ManageIndexRouteImport
+      parentRoute: typeof ManageRoute
+    }
+    '/manage/settings': {
+      id: '/manage/settings'
+      path: '/settings'
+      fullPath: '/manage/settings'
+      preLoaderRoute: typeof ManageSettingsRouteImport
+      parentRoute: typeof ManageRoute
+    }
+    '/manage/projects': {
+      id: '/manage/projects'
+      path: '/projects'
+      fullPath: '/manage/projects'
+      preLoaderRoute: typeof ManageProjectsRouteImport
+      parentRoute: typeof ManageRoute
+    }
+    '/manage/invoices': {
+      id: '/manage/invoices'
+      path: '/invoices'
+      fullPath: '/manage/invoices'
+      preLoaderRoute: typeof ManageInvoicesRouteImport
+      parentRoute: typeof ManageRoute
+    }
+    '/manage/contracts': {
+      id: '/manage/contracts'
+      path: '/contracts'
+      fullPath: '/manage/contracts'
+      preLoaderRoute: typeof ManageContractsRouteImport
+      parentRoute: typeof ManageRoute
+    }
+    '/manage/companies': {
+      id: '/manage/companies'
+      path: '/companies'
+      fullPath: '/manage/companies'
+      preLoaderRoute: typeof ManageCompaniesRouteImport
+      parentRoute: typeof ManageRoute
+    }
   }
 }
 
+interface ManageRouteChildren {
+  ManageCompaniesRoute: typeof ManageCompaniesRoute
+  ManageContractsRoute: typeof ManageContractsRoute
+  ManageInvoicesRoute: typeof ManageInvoicesRoute
+  ManageProjectsRoute: typeof ManageProjectsRoute
+  ManageSettingsRoute: typeof ManageSettingsRoute
+  ManageIndexRoute: typeof ManageIndexRoute
+}
+
+const ManageRouteChildren: ManageRouteChildren = {
+  ManageCompaniesRoute: ManageCompaniesRoute,
+  ManageContractsRoute: ManageContractsRoute,
+  ManageInvoicesRoute: ManageInvoicesRoute,
+  ManageProjectsRoute: ManageProjectsRoute,
+  ManageSettingsRoute: ManageSettingsRoute,
+  ManageIndexRoute: ManageIndexRoute,
+}
+
+const ManageRouteWithChildren =
+  ManageRoute._addFileChildren(ManageRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  HomeRoute: HomeRoute,
+  LoginRoute: LoginRoute,
+  LogoutRoute: LogoutRoute,
+  ManageRoute: ManageRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
