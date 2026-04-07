@@ -218,7 +218,7 @@ export function HomePage() {
 
   return (
     <RequireAuth>
-      <div className="mx-auto max-w-4xl space-y-8 p-6">
+      <div className="mx-auto max-w-4xl space-y-8 p-2 sm:p-6">
         <Header
           displayName={displayName}
           onAddTime={openAddTimeModal}
@@ -227,59 +227,83 @@ export function HomePage() {
           selectedDateStr={selectedDateStr}
         />
 
-        <div className="flex flex-wrap items-center justify-center gap-2 pl-4">
-          <div className="flex gap-2 invisible">
+        <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-center">
+          <div className="hidden md:flex md:flex-1">
+            <div className="invisible flex gap-1">
+              <Button
+                variant={calendarView === 'day' ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setCalendarView('day')}
+                aria-label="Day view"
+                title="Day view"
+              >
+                <List className="size-4" />
+              </Button>
+              <Button
+                variant={calendarView === 'month' ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setCalendarView('month')}
+                aria-label="Month view"
+                title="Month view"
+              >
+                <CalendarDays className="size-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center gap-1">
             <Button
-              variant={calendarView === 'day' ? 'default' : 'outline'}
+              variant="outline"
               size="icon"
-              onClick={() => setCalendarView('day')}
-              aria-label="Day view"
-              title="Day view"
+              onClick={goPrev}
+              aria-label={
+                calendarView === 'month' ? 'Previous month' : 'Previous day'
+              }
             >
-              <List className="size-4" />
+              <ChevronLeft />
             </Button>
-            <Button
-              variant={calendarView === 'month' ? 'default' : 'outline'}
-              size="icon"
-              onClick={() => setCalendarView('month')}
-              aria-label="Month view"
-              title="Month view"
+            <button
+              type="button"
+              onClick={openCalendar}
+              className="min-w-[220px] rounded-md px-2 py-1.5 text-center font-medium hover:bg-muted"
+              aria-label="Open calendar"
             >
-              <CalendarDays className="size-4" />
+              {calendarView === 'month' ? formattedMonthYear : formattedDate}
+            </button>
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={goNext}
+              aria-label={calendarView === 'month' ? 'Next month' : 'Next day'}
+            >
+              <ChevronRight />
             </Button>
           </div>
-          <div className="flex grow"> </div>
 
+          <div className="hidden md:flex md:flex-1 md:justify-end">
+            <div className="flex gap-1">
+              <Button
+                variant={calendarView === 'day' ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setCalendarView('day')}
+                aria-label="Day view"
+                title="Day view"
+              >
+                <List className="size-4" />
+              </Button>
+              <Button
+                variant={calendarView === 'month' ? 'default' : 'outline'}
+                size="icon"
+                onClick={() => setCalendarView('month')}
+                aria-label="Month view"
+                title="Month view"
+              >
+                <CalendarDays className="size-4" />
+              </Button>
+            </div>
+          </div>
 
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={goPrev}
-            aria-label={
-              calendarView === 'month' ? 'Previous month' : 'Previous day'
-            }
-          >
-            <ChevronLeft />
-          </Button>
-          <button
-            type="button"
-            onClick={openCalendar}
-            className="min-w-[220px] rounded-md px-2 py-1.5 text-center font-medium hover:bg-muted"
-            aria-label="Open calendar"
-          >
-            {calendarView === 'month' ? formattedMonthYear : formattedDate}
-          </button>
-          <Button
-            variant="outline"
-            size="icon"
-            onClick={goNext}
-            aria-label={calendarView === 'month' ? 'Next month' : 'Next day'}
-          >
-            <ChevronRight />
-          </Button>
-
-          <div className="flex grow"> </div>
-          <div className="flex gap-2">
+          <div className="flex justify-center gap-1 md:hidden">
             <Button
               variant={calendarView === 'day' ? 'default' : 'outline'}
               size="icon"
@@ -315,7 +339,7 @@ export function HomePage() {
           onSubmit={handleAddEntry}
         />
 
-        <div className="rounded-lg border p-4">
+        <div className="rounded-lg border p-1">
           {calendarView === 'month' ? (
             <div>
               <div className="grid grid-cols-8 gap-1 text-center text-xs font-medium text-muted-foreground">
@@ -366,7 +390,7 @@ export function HomePage() {
                       )
                     })}
                     <div
-                      className="flex min-h-14 flex-col items-center justify-center rounded-md border border-border/60 bg-muted/40 px-1 py-2 text-sm font-medium tabular-nums text-muted-foreground"
+                      className="flex min-h-14 flex-col items-center justify-center rounded-md border border-border/60 bg-muted/40 px-1 py-2 text-xs font-medium tabular-nums text-muted-foreground sm:text-sm"
                       aria-label={`Week total: ${formatHours(monthWeekTotals[rowIdx] ?? 0)} hours`}
                     >
                       {formatHours(monthWeekTotals[rowIdx] ?? 0)} h
