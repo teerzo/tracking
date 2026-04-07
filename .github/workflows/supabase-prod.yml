@@ -14,11 +14,11 @@ jobs:
       contents: write
 
     env:
-      SUPABASE_ACCESS_TOKEN: ${{ secrets.SB_PRODUCTION_ACCESS_TOKEN }}
-      SUPABASE_DB_PASSWORD: ${{ secrets.SB_PRODUCTION_DB_PASSWORD }}
-      SUPABASE_PROJECT_ID: ${{ secrets.SB_PRODUCTION_PROJECT_ID }}
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SUPABASE_PROJECT_ID }}
       # package.json update-types uses PROJECT_REF
-      PROJECT_REF: ${{ secrets.SB_PRODUCTION_PROJECT_ID }}
+      PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_ID }}
 
     steps:
       - uses: actions/checkout@v4
