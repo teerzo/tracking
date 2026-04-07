@@ -12,39 +12,53 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-      
+
     env:
       SUPABASE_ACCESS_TOKEN: ${{ secrets.SB_PRODUCTION_ACCESS_TOKEN }}
       SUPABASE_DB_PASSWORD: ${{ secrets.SB_PRODUCTION_DB_PASSWORD }}
       SUPABASE_PROJECT_ID: ${{ secrets.SB_PRODUCTION_PROJECT_ID }}
+      # package.json update-types uses PROJECT_REF
+      PROJECT_REF: ${{ secrets.SB_PRODUCTION_PROJECT_ID }}
 
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "20"
+
+      # Installs `supabase` on PATH — use `supabase`, not `npx supabase` (avoids extra npm install + warnings)
       - uses: supabase/setup-cli@v1
         with:
-          version: latest
+          version: 2.85.0
 
-      - run: npx supabase link --project-ref $SUPABASE_PROJECT_ID
-      - run: npx supabase db push
-      - run: npx supabase functions deploy --project-ref $SUPABASE_PROJECT_ID --no-verify-jwt
+      - name: Link Supabase project
+        run: supabase link --project-ref "$SUPABASE_PROJECT_ID" --password "$SUPABASE_DB_PASSWORD"
 
-      - run: npm run update-types
-      - name: check for file changes
+      - name: Push database migrations
+        run: supabase db push --yes
+
+      # Uncomment when you add Edge Functions under supabase/functions/
+      # - name: Deploy Edge Functions
+      #   run: supabase functions deploy --project-ref "$SUPABASE_PROJECT_ID" --no-verify-jwt
+
+      - name: Regenerate TypeScript types
+        run: npm run update-types
+
+      - name: Check for file changes
         id: git_status
         run: |
           echo "status=$(git status -s)" >> $GITHUB_OUTPUT
+
       - name: Commit files
-        if: ${{contains(steps.git_status.outputs.status, ' ')}}
+        if: contains(steps.git_status.outputs.status, 'types/supabase.ts')
         run: |
           git add types/supabase.ts
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          git commit -m "Update database types" -a
+          git diff --staged --quiet || git commit -m "chore: update database types"
+
       - name: Push changes
-        if: ${{contains(steps.git_status.outputs.status, ' ')}}
+        if: contains(steps.git_status.outputs.status, 'types/supabase.ts')
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
