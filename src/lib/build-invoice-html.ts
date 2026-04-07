@@ -12,6 +12,7 @@ export function buildInvoiceHtml(params: {
     address?: string
     mobile?: string
     email?: string
+    billing_email?: string | null
     abn?: string
     account_number?: string
     bsb?: string
@@ -47,6 +48,11 @@ export function buildInvoiceHtml(params: {
     ? Math.round((subtotal + gst) * 100) / 100
     : Math.round(subtotal * 100) / 100
 
+  const billFromEmail =
+    (user?.billing_email && String(user.billing_email).trim()) ||
+    user?.email ||
+    "—"
+
   return `
 <!DOCTYPE html>
 <html>
@@ -64,7 +70,7 @@ export function buildInvoiceHtml(params: {
       <h3 style="margin:0 0 0.5rem 0;font-size:0.9rem">Bill from (User)</h3>
       <p style="margin:0.25rem 0"><strong>Address:</strong> ${user?.address ?? "—"}</p>
       <p style="margin:0.25rem 0"><strong>Mobile:</strong> ${user?.mobile ?? "—"}</p>
-      <p style="margin:0.25rem 0"><strong>Email:</strong> ${user?.email ?? "—"}</p>
+      <p style="margin:0.25rem 0"><strong>Email:</strong> ${billFromEmail}</p>
       <p style="margin:0.25rem 0"><strong>ABN:</strong> ${user?.abn ?? "—"}</p>
       <p style="margin:0.25rem 0"><strong>Account number:</strong> ${user?.account_number ?? "—"}</p>
       <p style="margin:0.25rem 0"><strong>BSB:</strong> ${user?.bsb ?? "—"}</p>

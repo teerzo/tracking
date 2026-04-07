@@ -22,6 +22,7 @@ function ManageSettingsPage() {
   const [userLoading, setUserLoading] = React.useState(true)
   const [userData, setUserData] = React.useState<{
     email: string
+    billingEmail: string
     givenName: string
     familyName: string
     address: string
@@ -52,7 +53,9 @@ function ManageSettingsPage() {
       const [usersRes, settingsRes] = await Promise.all([
         supabase
           .from("users")
-          .select("email, given_name, family_name, address, mobile, abn, account_number, bsb")
+          .select(
+            "email, billing_email, given_name, family_name, address, mobile, abn, account_number, bsb"
+          )
           .eq("id", user.id)
           .single(),
         supabase
@@ -66,6 +69,7 @@ function ManageSettingsPage() {
       } else if (usersRes.data) {
         setUserData({
           email: usersRes.data.email ?? "",
+          billingEmail: usersRes.data.billing_email ?? "",
           givenName: usersRes.data.given_name ?? "",
           familyName: usersRes.data.family_name ?? "",
           address: usersRes.data.address ?? "",
@@ -133,6 +137,7 @@ function ManageSettingsPage() {
     const { error } = await supabase
       .from("users")
       .update({
+        billing_email: userData.billingEmail.trim() || null,
         given_name: userData.givenName || null,
         family_name: userData.familyName || null,
         address: userData.address || null,
@@ -239,6 +244,22 @@ function ManageSettingsPage() {
                         disabled
                         readOnly
                         className="bg-muted"
+                      />
+                    </Field>
+                    <Field>
+                      <FieldLabel htmlFor="user-billing-email">
+                        Billing email
+                      </FieldLabel>
+                      <Input
+                        id="user-billing-email"
+                        type="email"
+                        value={userData?.billingEmail ?? ""}
+                        onChange={(e) =>
+                          setUserData((u) =>
+                            u ? { ...u, billingEmail: e.target.value } : null
+                          )
+                        }
+                        placeholder="Shown on invoices (optional)"
                       />
                     </Field>
                     <Field>

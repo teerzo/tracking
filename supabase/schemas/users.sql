@@ -1,9 +1,10 @@
 -- Schema: public.users table
--- Profile + invoice "Bill from" fields: id, email, given_name, family_name, address, mobile, abn, account_number, bsb
+-- Profile + invoice "Bill from" fields: id, email, billing_email, given_name, family_name, address, mobile, abn, account_number, bsb
 
 create table public.users (
   id uuid primary key,
   email text not null unique,
+  billing_email text,
   given_name text,
   family_name text,
   address text,

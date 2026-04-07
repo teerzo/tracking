@@ -172,6 +172,7 @@ export function InvoiceDialog({
       address?: string
       mobile?: string
       email?: string
+      billing_email?: string | null
       abn?: string
       account_number?: string
       bsb?: string
@@ -190,7 +191,9 @@ export function InvoiceDialog({
       if (authUser?.id) {
         const { data: userRow } = await supabase
           .from("users")
-          .select("address, mobile, email, abn, account_number, bsb")
+          .select(
+            "address, mobile, email, billing_email, abn, account_number, bsb"
+          )
           .eq("id", authUser.id)
           .single()
         userData = userRow ?? null

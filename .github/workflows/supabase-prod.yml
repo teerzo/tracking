@@ -1,0 +1,51 @@
+name: Deploy Migrations to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    environment: Production
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      
+    env:
+      SUPABASE_ACCESS_TOKEN: ${{ secrets.SB_PRODUCTION_ACCESS_TOKEN }}
+      SUPABASE_DB_PASSWORD: ${{ secrets.SB_PRODUCTION_DB_PASSWORD }}
+      SUPABASE_PROJECT_ID: ${{ secrets.SB_PRODUCTION_PROJECT_ID }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - run: supabase link --project-ref $SUPABASE_PROJECT_ID
+      - run: supabase db push
+      - run: supabase functions deploy --project-ref $SUPABASE_PROJECT_ID --no-verify-jwt
+
+      - run: npm run update-types
+      - name: check for file changes
+        id: git_status
+        run: |
+          echo "status=$(git status -s)" >> $GITHUB_OUTPUT
+      - name: Commit files
+        if: ${{contains(steps.git_status.outputs.status, ' ')}}
+        run: |
+          git add types/supabase.ts
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git commit -m "Update database types" -a
+      - name: Push changes
+        if: ${{contains(steps.git_status.outputs.status, ' ')}}
+        uses: ad-m/github-push-action@master
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          branch: ${{ github.ref }}
