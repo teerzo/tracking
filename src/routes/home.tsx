@@ -69,6 +69,7 @@ export function HomePage() {
   const [editEntry, setEditEntry] = React.useState<TimeEntry | null>(null)
   const [editHours, setEditHours] = React.useState('')
   const [editNotes, setEditNotes] = React.useState('')
+  const [editTravelledToOffice, setEditTravelledToOffice] = React.useState(false)
   const [deleteConfirmStep, setDeleteConfirmStep] = React.useState<1 | 2>(1)
 
   const handleAddEntry = (entry: {
@@ -181,11 +182,13 @@ export function HomePage() {
     setEditEntry(e)
     setEditHours(String(e.hours))
     setEditNotes(e.notes ?? '')
+    setEditTravelledToOffice(Boolean(e.travelledToOffice))
   }
   const closeEditEntry = () => {
     setEditEntry(null)
     setEditHours('')
     setEditNotes('')
+    setEditTravelledToOffice(false)
     setDeleteConfirmStep(1)
   }
   const handleSaveEditEntry = async (ev: React.FormEvent) => {
@@ -193,7 +196,12 @@ export function HomePage() {
     if (!editEntry) return
     const h = parseFloat(editHours)
     if (Number.isNaN(h) || h < 0) return
-    await updateEntry(editEntry.id, h, editNotes.trim() || undefined)
+    await updateEntry(
+      editEntry.id,
+      h,
+      editNotes.trim() || undefined,
+      editTravelledToOffice
+    )
     closeEditEntry()
   }
   const handleDeleteEditEntry = async () => {
@@ -531,28 +539,39 @@ export function HomePage() {
                           required
                         />
                       </Field>
+                      <Field orientation="horizontal">
+                        <input
+                          id="edit-travelled-to-office"
+                          type="checkbox"
+                          checked={editTravelledToOffice}
+                          onChange={(ev) =>
+                            setEditTravelledToOffice(ev.target.checked)
+                          }
+                          className="h-4 w-4 rounded border-input"
+                        />
+                        <FieldLabel htmlFor="edit-travelled-to-office">
+                          Travelled to office
+                        </FieldLabel>
+                      </Field>
                     </>
                   )}
                 </FieldGroup>
-                <DialogFooter className="flex-col gap-2 sm:flex-row sm:justify-between">
+                <DialogFooter className="flex flex-row justify-end gap-2">
                   <Button
                     type="button"
                     variant="destructive"
                     onClick={handleDeleteEditEntry}
-                    className="sm:mr-auto"
                   >
                     Delete
                   </Button>
-                  <div className="flex gap-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={closeEditEntry}
-                    >
-                      Cancel
-                    </Button>
-                    <Button type="submit">Save</Button>
-                  </div>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={closeEditEntry}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit">Save</Button>
                 </DialogFooter>
               </form>
             )}

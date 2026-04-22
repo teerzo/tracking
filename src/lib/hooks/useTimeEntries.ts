@@ -100,10 +100,22 @@ export function useTimeEntries() {
   )
 
   const updateEntry = React.useCallback(
-    async (id: string, hours: number, notes?: string) => {
+    async (
+      id: string,
+      hours: number,
+      notes?: string,
+      travelledToOffice?: boolean
+    ) => {
       if (!supabase || hours < 0) return
-      const updates: { hours: number; notes?: string | null } = { hours }
+      const updates: {
+        hours: number
+        notes?: string | null
+        travelled_to_office?: boolean
+      } = { hours }
       if (notes !== undefined) updates.notes = notes || null
+      if (travelledToOffice !== undefined) {
+        updates.travelled_to_office = travelledToOffice
+      }
       const { data, error: err } = await supabase
         .from("time")
         .update(updates)
