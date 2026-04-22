@@ -118,7 +118,7 @@ export function TimeEntryForm({
             </div>
             <Button type="submit" disabled={projects.length === 0}>
               <PlusIcon />
-              Add entry
+              Add
             </Button>
           </FieldGroup>
         </form>

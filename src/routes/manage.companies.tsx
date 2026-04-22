@@ -89,7 +89,7 @@ function ManageCompaniesPage() {
   useManageHeaderAction(
     <Button variant="outline" onClick={openAdd}>
       <PlusIcon />
-      Add company
+      Add
     </Button>
   )
 

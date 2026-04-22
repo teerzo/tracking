@@ -210,7 +210,7 @@ export function HomePage() {
   const entriesForDay = entries.filter((e) => e.date === selectedDateStr)
   return (
     <RequireAuth>
-      <div className="mx-auto max-w-4xl space-y-8 p-2 sm:p-6">
+      <div className="mx-auto max-w-4xl space-y-8 p-6 sm:p-6">
         <Header
           displayName={displayName}
           userEmail={email}

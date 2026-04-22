@@ -260,7 +260,7 @@ export function InvoiceDialog({
       <DialogTrigger asChild>
         <Button variant="outline">
           <FileTextIcon />
-          Generate invoice
+          Add  
         </Button>
       </DialogTrigger>
       <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto print:block print:max-h-none print:overflow-visible">
@@ -490,7 +490,7 @@ export function InvoiceDialog({
             )}
           </div>
 
-          <DialogFooter className="print:hidden">
+          <DialogFooter className="flex flex-row justify-end gap-2 print:hidden">
             <DialogClose asChild>
               <Button variant="outline">Close</Button>
             </DialogClose>

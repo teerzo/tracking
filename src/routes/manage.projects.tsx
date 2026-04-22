@@ -78,7 +78,7 @@ function ManageProjectsPage() {
   useManageHeaderAction(
     <Button variant="outline" onClick={openAdd}>
       <PlusIcon />
-      Add project
+      Add
     </Button>
   )
 
