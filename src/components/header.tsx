@@ -64,8 +64,8 @@ export function Header({
   })()
 
   return (
-    <header className="mb-4 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <h1 className="text-2xl font-semibold">
+    <header className="mb-4 flex flex-row gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <h1 className="text-xl font-semibold sm:text-2xl">
         <Link to="/" className="hover:opacity-80">
           Tracking
         </Link>
