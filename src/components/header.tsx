@@ -12,17 +12,12 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Check, Cog, LogOut, PlusIcon } from "lucide-react"
-import type { Project, TimeEntry } from "@/lib/time-tracking"
-import { InvoiceDialog } from "@/components/time-tracking/invoice-dialog"
 
 interface HeaderProps {
   displayName: string | null
   userEmail?: string | null
   extraAction?: React.ReactNode
   onAddTime?: () => void
-  projects?: Project[]
-  entries?: TimeEntry[]
-  selectedDateStr?: string
 }
 
 export function Header({
@@ -30,15 +25,10 @@ export function Header({
   userEmail,
   extraAction,
   onAddTime,
-  projects,
-  entries,
-  selectedDateStr,
 }: HeaderProps) {
   const { pathname } = useLocation()
   const [theme, setTheme] = React.useState<"light" | "dark">("light")
-  const showTimeActions = Boolean(
-    onAddTime && projects && entries && selectedDateStr
-  )
+  const showTimeActions = Boolean(onAddTime)
 
   React.useEffect(() => {
     const root = document.documentElement
@@ -64,7 +54,7 @@ export function Header({
   })()
 
   return (
-    <header className="mb-4 flex flex-row gap-4 sm:flex-row sm:items-center sm:justify-between">
+    <header className="mb-4 flex flex-row justify-between gap-4 sm:flex-row sm:items-center sm:justify-between">
       <h1 className="text-xl font-semibold sm:text-2xl">
         <Link to="/" className="hover:opacity-80">
           Tracking
@@ -77,17 +67,10 @@ export function Header({
       <div className="flex items-center gap-2">
         {extraAction}
         {showTimeActions && (
-          <>
-            <Button variant="outline" onClick={onAddTime}>
-              <PlusIcon />
-              Add Time
-            </Button>
-            <InvoiceDialog
-              projects={projects as Project[]}
-              entries={entries as TimeEntry[]}
-              selectedDateStr={selectedDateStr as string}
-            />
-          </>
+          <Button variant="outline" onClick={onAddTime}>
+            <PlusIcon />
+            Add Time
+          </Button>
         )}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

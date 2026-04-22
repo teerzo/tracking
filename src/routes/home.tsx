@@ -3,7 +3,6 @@
 import * as React from 'react'
 import { useProjectNameMap } from '@/lib/hooks/useProjectNameMap'
 import { useUser } from '@/lib/hooks/useUser'
-import { useProjects } from '@/lib/hooks/useProjects'
 import { useTimeEntries } from '@/lib/hooks/useTimeEntries'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { supabase } from '@/lib/supabaseClient'
@@ -52,7 +51,6 @@ export const Route = createFileRoute('/home')({
 })
 
 export function HomePage() {
-  const { projects } = useProjects()
   const { entries, addEntry, updateEntry, deleteEntry } = useTimeEntries()
   const { displayName, email } = useUser()
   const { projectNameMap } = useProjectNameMap()
@@ -210,23 +208,13 @@ export function HomePage() {
 
   const selectedDateStr = toLocalDateString(selectedDate)
   const entriesForDay = entries.filter((e) => e.date === selectedDateStr)
-  const projectsForHeader = projects.map((p) => ({
-    id: p.id,
-    name: p.projectName,
-    hourlyRate: p.hourlyRate,
-    companyId: p.companyId,
-  }))
-
   return (
     <RequireAuth>
       <div className="mx-auto max-w-4xl space-y-8 p-2 sm:p-6">
         <Header
           displayName={displayName}
-                    userEmail={email}
+          userEmail={email}
           onAddTime={openAddTimeModal}
-          projects={projectsForHeader}
-          entries={entries}
-          selectedDateStr={selectedDateStr}
         />
 
         <div className="flex flex-col gap-2 md:flex-row md:items-center md:justify-center">
