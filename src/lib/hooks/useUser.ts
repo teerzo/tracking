@@ -12,6 +12,7 @@ export interface CurrentUserProfile {
 export function useUser() {
   const navigate = useNavigate()
   const [profile, setProfile] = React.useState<CurrentUserProfile | null>(null)
+  const [email, setEmail] = React.useState<string | null>(null)
   const [loading, setLoading] = React.useState(true)
 
   React.useEffect(() => {
@@ -31,9 +32,11 @@ export function useUser() {
       }
       if (!user) {
         setProfile(null)
+        setEmail(null)
         setLoading(false)
         return
       }
+      setEmail(user.email ?? null)
       const { data: row } = await supabase
         .from("users")
         .select("given_name, family_name")
@@ -53,5 +56,5 @@ export function useUser() {
       ? [profile?.givenName, profile?.familyName].filter(Boolean).join(" ")
       : null
 
-  return { profile, displayName, loading }
+  return { profile, displayName, email, loading }
 }

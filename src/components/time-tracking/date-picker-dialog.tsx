@@ -83,7 +83,7 @@ export function DatePickerDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-h-[85vh] max-w-sm overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Select date</DialogTitle>
         </DialogHeader>

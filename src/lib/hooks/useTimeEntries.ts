@@ -18,7 +18,7 @@ export function useTimeEntries() {
     setError(null)
     const { data, error: err } = await supabase
       .from("time")
-      .select("id, project_id, date, hours, notes")
+      .select("id, project_id, date, hours, notes, travelled_to_office")
       .order("date", { ascending: false })
 
     if (err) {
@@ -32,6 +32,7 @@ export function useTimeEntries() {
           date: row.date,
           hours: Number(row.hours),
           notes: (row.notes as string) ?? undefined,
+          travelledToOffice: Boolean(row.travelled_to_office),
         }))
       )
     }
@@ -48,6 +49,7 @@ export function useTimeEntries() {
       date: string
       hours: number
       notes?: string
+      travelledToOffice?: boolean
     }) => {
       if (!supabase) return
       const timeZone =
@@ -65,6 +67,7 @@ export function useTimeEntries() {
         p_notes: input.notes ?? null,
         p_time_zone: timeZone,
         p_client_offset_minutes: offsetMinutes,
+        p_travelled_to_office: input.travelledToOffice ?? false,
       })
 
       if (err) {
@@ -80,6 +83,7 @@ export function useTimeEntries() {
           date: row.date,
           hours: Number(row.hours),
           notes: (row.notes as string) ?? undefined,
+          travelledToOffice: Boolean(row.travelled_to_office),
         }
         setEntries((prev) => {
           const idx = prev.findIndex((e) => e.id === entry.id)
@@ -104,7 +108,7 @@ export function useTimeEntries() {
         .from("time")
         .update(updates)
         .eq("id", id)
-        .select("id, project_id, date, hours, notes")
+        .select("id, project_id, date, hours, notes, travelled_to_office")
         .single()
 
       if (err) {
@@ -118,6 +122,7 @@ export function useTimeEntries() {
           date: data.date,
           hours: Number(data.hours),
           notes: (data.notes as string) ?? undefined,
+          travelledToOffice: Boolean(data.travelled_to_office),
         }
         setEntries((prev) =>
           prev.map((e) => (e.id === entry.id ? entry : e))

@@ -69,7 +69,7 @@ export function ProjectsModals(props: ProjectsModalsProps) {
     <>
       {/* Add project */}
       <Dialog open={addOpen} onOpenChange={onAddOpenChange}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-h-[85vh] max-w-sm overflow-y-auto">
           <form onSubmit={onAddSubmit}>
             <DialogHeader>
               <DialogTitle>Add project</DialogTitle>
@@ -168,7 +168,7 @@ export function ProjectsModals(props: ProjectsModalsProps) {
 
       {/* Edit project */}
       <Dialog open={!!editProject} onOpenChange={(open) => !open && onEditClose()}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-h-[85vh] max-w-sm overflow-y-auto">
           <form onSubmit={onEditSubmit}>
             <DialogHeader>
               <DialogTitle>Edit project</DialogTitle>
@@ -277,7 +277,7 @@ export function ProjectsModals(props: ProjectsModalsProps) {
           if (!open) onDeleteClose()
         }}
       >
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-h-[85vh] max-w-sm overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {deleteProject && deleteConfirmStep === 1

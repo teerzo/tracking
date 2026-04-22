@@ -54,7 +54,7 @@ export const Route = createFileRoute('/home')({
 export function HomePage() {
   const { projects } = useProjects()
   const { entries, addEntry, updateEntry, deleteEntry } = useTimeEntries()
-  const { displayName } = useUser()
+  const { displayName, email } = useUser()
   const { projectNameMap } = useProjectNameMap()
 
   const toLocalDateString = (d: Date) => {
@@ -78,6 +78,7 @@ export function HomePage() {
     date: string
     hours: number
     notes?: string
+    travelledToOffice?: boolean
   }) => {
     void addEntry(entry)
   }
@@ -221,6 +222,7 @@ export function HomePage() {
       <div className="mx-auto max-w-4xl space-y-8 p-2 sm:p-6">
         <Header
           displayName={displayName}
+                    userEmail={email}
           onAddTime={openAddTimeModal}
           projects={projectsForHeader}
           entries={entries}
@@ -478,7 +480,7 @@ export function HomePage() {
           open={!!editEntry}
           onOpenChange={(open) => !open && closeEditEntry()}
         >
-          <DialogContent className="max-w-sm">
+          <DialogContent className="max-h-[85vh] max-w-sm overflow-y-auto">
             {deleteConfirmStep === 2 ? (
               <>
                 <DialogHeader>

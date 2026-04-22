@@ -5,15 +5,32 @@ CREATE OR REPLACE FUNCTION public.add_time_entry(
   p_hours numeric,
   p_notes text DEFAULT NULL,
   p_time_zone text DEFAULT NULL,
-  p_client_offset_minutes integer DEFAULT NULL
+  p_client_offset_minutes integer DEFAULT NULL,
+  p_travelled_to_office boolean DEFAULT false
 )
 RETURNS SETOF public."time"
 LANGUAGE sql
 SECURITY DEFINER
 SET search_path = public
 AS $$
-  INSERT INTO public."time" (project_id, date, hours, notes, time_zone, client_offset_minutes)
-  VALUES (p_project_id, p_date, p_hours, p_notes, p_time_zone, p_client_offset_minutes)
+  INSERT INTO public."time" (
+    project_id,
+    date,
+    hours,
+    notes,
+    time_zone,
+    client_offset_minutes,
+    travelled_to_office
+  )
+  VALUES (
+    p_project_id,
+    p_date,
+    p_hours,
+    p_notes,
+    p_time_zone,
+    p_client_offset_minutes,
+    COALESCE(p_travelled_to_office, false)
+  )
   ON CONFLICT (project_id, date)
   DO UPDATE SET
     hours = public."time".hours + EXCLUDED.hours,
@@ -22,11 +39,12 @@ AS $$
       NULLIF(TRIM(COALESCE(EXCLUDED.notes, '')), '')
     )), ''),
     time_zone = COALESCE(EXCLUDED.time_zone, public."time".time_zone),
-    client_offset_minutes = COALESCE(EXCLUDED.client_offset_minutes, public."time".client_offset_minutes)
+    client_offset_minutes = COALESCE(EXCLUDED.client_offset_minutes, public."time".client_offset_minutes),
+    travelled_to_office = public."time".travelled_to_office OR EXCLUDED.travelled_to_office
   RETURNING *;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.add_time_entry(uuid, date, numeric, text, text, integer) TO anon, authenticated, service_role;
+GRANT EXECUTE ON FUNCTION public.add_time_entry(uuid, date, numeric, text, text, integer, boolean) TO anon, authenticated, service_role;
 
 CREATE OR REPLACE FUNCTION public.create_user(email text, password text, clinic_id uuid, given_name text, family_name text)
  RETURNS uuid

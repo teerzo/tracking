@@ -1,4 +1,4 @@
-import { createFileRoute, Link, redirect, useNavigate } from "@tanstack/react-router"
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router"
 import { useEffect, useState } from "react"
 import { supabase } from "@/lib/supabaseClient"
 import { Button } from "@/components/ui/button"
@@ -72,6 +72,7 @@ function LoginPage() {
   if (!mounted) {
     return (
       <div className="mx-auto flex min-h-[60vh] max-w-sm flex-col justify-center p-6">
+        <h1 className="mb-4 text-center text-2xl font-semibold">Login</h1>
         <Card>
           <CardHeader>
             <CardTitle>Sign in</CardTitle>
@@ -89,6 +90,7 @@ function LoginPage() {
 
   return (
     <div className="mx-auto flex min-h-[60vh] max-w-sm flex-col justify-center p-6">
+      <h1 className="mb-4 text-center text-2xl font-semibold">Login</h1>
       <Card>
         <CardHeader>
           <CardTitle>Sign in</CardTitle>
@@ -131,12 +133,9 @@ function LoginPage() {
               </FieldGroup>
             </FieldSet>
           </CardContent>
-          <CardFooter className="flex flex-col gap-3 sm:flex-row">
+          <CardFooter className="mt-2 flex flex-col gap-3 sm:flex-row">
             <Button type="submit" disabled={loading} className="sm:flex-1">
               {loading ? "Signing in…" : "Sign in"}
-            </Button>
-            <Button type="button" variant="outline" asChild>
-              <Link to="/">Cancel</Link>
             </Button>
           </CardFooter>
         </form>

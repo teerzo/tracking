@@ -160,7 +160,6 @@ function ManageSettingsPage() {
 
   return (
     <div>
-      <h2 className="mb-4 text-lg font-semibold">Settings</h2>
       <p className="mb-8 text-muted-foreground">
         Configure your preferences and account settings.
       </p>

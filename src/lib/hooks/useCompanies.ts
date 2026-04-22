@@ -11,6 +11,10 @@ export interface Company {
   phone: string
   email: string
   contactName: string
+  billingEmail: string
+  billingContact: string
+  remoteOnly: boolean
+  distance: string
 }
 
 export function useCompanies() {
@@ -43,6 +47,10 @@ export function useCompanies() {
           phone: row.phone ?? "",
           email: row.email ?? "",
           contactName: row.contact_name ?? "",
+          billingEmail: row.billing_email ?? "",
+          billingContact: row.billing_contact ?? "",
+          remoteOnly: row.remote_only ?? false,
+          distance: row.distance ?? "",
         }))
         setCompanies(mapped)
       }

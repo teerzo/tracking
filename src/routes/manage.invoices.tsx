@@ -6,6 +6,8 @@ import { useInvoices, type Invoice } from "@/lib/hooks/useInvoices"
 import { useTimeEntries } from "@/lib/hooks/useTimeEntries"
 import { useProjects } from "@/lib/hooks/useProjects"
 import { InvoicesTable } from "@/components/invoices/invoices-table"
+import { InvoiceDialog } from "@/components/time-tracking/invoice-dialog"
+import { useManageHeaderAction } from "@/components/manage-header-action"
 import {
   filterEntriesByDateRange,
   aggregateEntriesForInvoice,
@@ -29,8 +31,27 @@ function ManageInvoicesPage() {
   const { invoices, setInvoices, loading, error } = useInvoices()
   const { entries } = useTimeEntries()
   const { projects } = useProjects()
+  const today = React.useMemo(() => new Date().toISOString().slice(0, 10), [])
+  const projectsForHeader = React.useMemo(
+    () =>
+      projects.map((p) => ({
+        id: p.id,
+        name: p.projectName,
+        hourlyRate: p.hourlyRate,
+        companyId: p.companyId,
+      })),
+    [projects]
+  )
   const [deleteInvoice, setDeleteInvoice] = React.useState<Invoice | null>(null)
   const [deleteConfirmStep, setDeleteConfirmStep] = React.useState<1 | 2>(1)
+
+  useManageHeaderAction(
+    <InvoiceDialog
+      projects={projectsForHeader}
+      entries={entries}
+      selectedDateStr={today}
+    />
+  )
 
   const openDelete = (inv: Invoice) => {
     setDeleteInvoice(inv)
@@ -178,7 +199,6 @@ function ManageInvoicesPage() {
 
   return (
     <div>
-      <h2 className="mb-4 text-lg font-semibold">Manage Invoices</h2>
       {error && (
         <p className="mb-2 text-sm text-destructive">{error}</p>
       )}
@@ -198,7 +218,7 @@ function ManageInvoicesPage() {
           if (!open) closeDelete()
         }}
       >
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-h-[85vh] max-w-sm overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {deleteInvoice && deleteConfirmStep === 1

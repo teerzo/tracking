@@ -9,6 +9,7 @@ import { useCompanies } from "@/lib/hooks/useCompanies"
 import { useProjects, type Project } from "@/lib/hooks/useProjects"
 import { ProjectsTable } from "@/components/projects/projects-table"
 import { ProjectsModals } from "@/components/projects/projects-modals"
+import { useManageHeaderAction } from "@/components/manage-header-action"
 
 export const Route = createFileRoute("/manage/projects")({
   component: ManageProjectsPage,
@@ -59,6 +60,7 @@ function ManageProjectsPage() {
     endDate: "",
     hourlyRate: 0,
     company: "",
+    companyId: "",
   })
 
   const openAdd = () => {
@@ -68,9 +70,17 @@ function ManageProjectsPage() {
       endDate: "",
       hourlyRate: 0,
       company: "",
+      companyId: "",
     })
     setAddOpen(true)
   }
+
+  useManageHeaderAction(
+    <Button variant="outline" onClick={openAdd}>
+      <PlusIcon />
+      Add project
+    </Button>
+  )
 
   const saveAdd = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -101,6 +111,7 @@ function ManageProjectsPage() {
             endDate: data.end_date ?? "",
             hourlyRate: Number(data.hourly_rate ?? 0),
             company: data.company ?? "",
+            companyId: data.company_id ?? "",
           }
         }
       }
@@ -143,14 +154,7 @@ function ManageProjectsPage() {
   // }
 
   return (
-    <div>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Manage Projects</h2>
-        <Button variant="outline" onClick={openAdd}>
-          <PlusIcon />
-          Add
-        </Button>
-      </div>
+    <div className="container mx-auto margin-top-5">
       <ProjectsModals
         companies={companies}
         addOpen={addOpen}

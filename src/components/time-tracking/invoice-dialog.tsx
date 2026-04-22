@@ -263,7 +263,7 @@ export function InvoiceDialog({
           Generate invoice
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-2xl print:block">
+      <DialogContent className="max-h-[85vh] max-w-2xl overflow-y-auto print:block print:max-h-none print:overflow-visible">
         <div className="space-y-4">
           <DialogHeader>
             <DialogTitle>Generate invoice</DialogTitle>

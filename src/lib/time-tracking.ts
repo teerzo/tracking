@@ -11,6 +11,7 @@ export interface TimeEntry {
   date: string
   hours: number
   notes?: string
+  travelledToOffice?: boolean
 }
 
 export interface InvoiceLine {

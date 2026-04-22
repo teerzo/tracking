@@ -57,7 +57,7 @@ export function CompaniesModals(props: CompaniesModalsProps) {
     <>
       {/* Add company */}
       <Dialog open={addOpen} onOpenChange={onAddOpenChange}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-h-[85vh] max-w-sm overflow-y-auto">
           <form onSubmit={onAddSubmit}>
             <DialogHeader>
               <DialogTitle>Add company</DialogTitle>
@@ -126,6 +126,49 @@ export function CompaniesModals(props: CompaniesModalsProps) {
                   }
                 />
               </Field>
+              <Field>
+                <FieldLabel htmlFor="add-company-billing-email">Billing email</FieldLabel>
+                <Input
+                  id="add-company-billing-email"
+                  type="email"
+                  value={newCompany.billingEmail}
+                  onChange={(e) =>
+                    setNewCompany((c) => ({ ...c, billingEmail: e.target.value }))
+                  }
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="add-company-billing-contact">Billing contact</FieldLabel>
+                <Input
+                  id="add-company-billing-contact"
+                  value={newCompany.billingContact}
+                  onChange={(e) =>
+                    setNewCompany((c) => ({ ...c, billingContact: e.target.value }))
+                  }
+                />
+              </Field>
+              <Field>
+                <FieldLabel htmlFor="add-company-distance">Distance</FieldLabel>
+                <Input
+                  id="add-company-distance"
+                  value={newCompany.distance}
+                  onChange={(e) =>
+                    setNewCompany((c) => ({ ...c, distance: e.target.value }))
+                  }
+                />
+              </Field>
+              <Field orientation="horizontal">
+                <input
+                  id="add-company-remote-only"
+                  type="checkbox"
+                  checked={newCompany.remoteOnly}
+                  onChange={(e) =>
+                    setNewCompany((c) => ({ ...c, remoteOnly: e.target.checked }))
+                  }
+                  className="h-4 w-4 rounded border-input"
+                />
+                <FieldLabel htmlFor="add-company-remote-only">Remote only</FieldLabel>
+              </Field>
             </FieldGroup>
             <DialogFooter>
               <Button
@@ -145,7 +188,7 @@ export function CompaniesModals(props: CompaniesModalsProps) {
 
       {/* Edit company */}
       <Dialog open={!!editCompany} onOpenChange={(open) => !open && onEditClose()}>
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-h-[85vh] max-w-sm overflow-y-auto">
           <form onSubmit={onEditSubmit}>
             <DialogHeader>
               <DialogTitle>Edit company</DialogTitle>
@@ -226,6 +269,57 @@ export function CompaniesModals(props: CompaniesModalsProps) {
                     }
                   />
                 </Field>
+                <Field>
+                  <FieldLabel htmlFor="edit-company-billing-email">Billing email</FieldLabel>
+                  <Input
+                    id="edit-company-billing-email"
+                    type="email"
+                    value={editCompany.billingEmail}
+                    onChange={(e) =>
+                      setEditCompany((c) =>
+                        c ? { ...c, billingEmail: e.target.value } : null,
+                      )
+                    }
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="edit-company-billing-contact">Billing contact</FieldLabel>
+                  <Input
+                    id="edit-company-billing-contact"
+                    value={editCompany.billingContact}
+                    onChange={(e) =>
+                      setEditCompany((c) =>
+                        c ? { ...c, billingContact: e.target.value } : null,
+                      )
+                    }
+                  />
+                </Field>
+                <Field>
+                  <FieldLabel htmlFor="edit-company-distance">Distance</FieldLabel>
+                  <Input
+                    id="edit-company-distance"
+                    value={editCompany.distance}
+                    onChange={(e) =>
+                      setEditCompany((c) =>
+                        c ? { ...c, distance: e.target.value } : null,
+                      )
+                    }
+                  />
+                </Field>
+                <Field orientation="horizontal">
+                  <input
+                    id="edit-company-remote-only"
+                    type="checkbox"
+                    checked={editCompany.remoteOnly}
+                    onChange={(e) =>
+                      setEditCompany((c) =>
+                        c ? { ...c, remoteOnly: e.target.checked } : null,
+                      )
+                    }
+                    className="h-4 w-4 rounded border-input"
+                  />
+                  <FieldLabel htmlFor="edit-company-remote-only">Remote only</FieldLabel>
+                </Field>
               </FieldGroup>
             )}
             <DialogFooter>
@@ -245,7 +339,7 @@ export function CompaniesModals(props: CompaniesModalsProps) {
           if (!open) onDeleteClose()
         }}
       >
-        <DialogContent className="max-w-sm">
+        <DialogContent className="max-h-[85vh] max-w-sm overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {deleteCompany && deleteConfirmStep === 1

@@ -1,5 +1,5 @@
 -- Schema: companies table (invoice "Bill to")
--- Columns: id, name, address, abn, phone, email, contact_name
+-- Columns: id, name, address, abn, phone, email, contact_name, billing_email, billing_contact, remote_only, distance
 
 create table public.companies (
   id uuid primary key default gen_random_uuid(),
@@ -8,7 +8,11 @@ create table public.companies (
   abn text,
   phone text,
   email text,
-  contact_name text
+  contact_name text,
+  billing_email text,
+  billing_contact text,
+  remote_only boolean not null default false,
+  distance text
 );
 
 create index idx_companies_name on public.companies (name);

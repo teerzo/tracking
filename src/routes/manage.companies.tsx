@@ -8,6 +8,7 @@ import { supabase } from "@/lib/supabaseClient"
 import { useCompanies, type Company } from "@/lib/hooks/useCompanies"
 import { CompaniesTable } from "@/components/companies/companies-table"
 import { CompaniesModals } from "@/components/companies/companies-modals"
+import { useManageHeaderAction } from "@/components/manage-header-action"
 
 export const Route = createFileRoute("/manage/companies")({
   component: ManageCompaniesPage,
@@ -37,6 +38,10 @@ function ManageCompaniesPage() {
             phone: editCompany.phone || null,
             email: editCompany.email || null,
             contact_name: editCompany.contactName || null,
+            billing_email: editCompany.billingEmail || null,
+            billing_contact: editCompany.billingContact || null,
+            remote_only: editCompany.remoteOnly,
+            distance: editCompany.distance || null,
           })
           .eq("id", editCompany.id)
 
@@ -59,6 +64,10 @@ function ManageCompaniesPage() {
     phone: "",
     email: "",
     contactName: "",
+    billingEmail: "",
+    billingContact: "",
+    remoteOnly: false,
+    distance: "",
   })
 
   const openAdd = () => {
@@ -69,9 +78,20 @@ function ManageCompaniesPage() {
       phone: "",
       email: "",
       contactName: "",
+      billingEmail: "",
+      billingContact: "",
+      remoteOnly: false,
+      distance: "",
     })
     setAddOpen(true)
   }
+
+  useManageHeaderAction(
+    <Button variant="outline" onClick={openAdd}>
+      <PlusIcon />
+      Add company
+    </Button>
+  )
 
   const saveAdd = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -89,6 +109,10 @@ function ManageCompaniesPage() {
             phone: newCompany.phone || null,
             email: newCompany.email || null,
             contact_name: newCompany.contactName || null,
+            billing_email: newCompany.billingEmail || null,
+            billing_contact: newCompany.billingContact || null,
+            remote_only: newCompany.remoteOnly,
+            distance: newCompany.distance || null,
           })
           .select("*")
           .single()
@@ -104,6 +128,10 @@ function ManageCompaniesPage() {
             phone: data.phone ?? "",
             email: data.email ?? "",
             contactName: data.contact_name ?? "",
+            billingEmail: data.billing_email ?? "",
+            billingContact: data.billing_contact ?? "",
+            remoteOnly: data.remote_only ?? false,
+            distance: data.distance ?? "",
           }
         }
       }
@@ -140,13 +168,6 @@ function ManageCompaniesPage() {
 
   return (
     <div>
-      <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Companies</h2>
-        <Button variant="outline" onClick={openAdd}>
-          <PlusIcon />
-          Add
-        </Button>
-      </div>
       <CompaniesModals
         addOpen={addOpen}
         onAddOpenChange={setAddOpen}

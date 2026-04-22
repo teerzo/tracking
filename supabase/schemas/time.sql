@@ -1,5 +1,5 @@
 -- Schema: time table (time entries per project)
--- Columns: id, project_id, hours, date, notes, date_created, time_zone, client_offset_minutes
+-- Columns: id, project_id, hours, date, notes, date_created, time_zone, client_offset_minutes, travelled_to_office
 
 create table public.time (
   id uuid primary key default gen_random_uuid(),
@@ -9,7 +9,8 @@ create table public.time (
   notes text,
   date_created timestamptz not null default now(),
   time_zone text,
-  client_offset_minutes integer
+  client_offset_minutes integer,
+  travelled_to_office boolean not null default false
 );
 
 create unique index time_project_id_date_key on public.time (project_id, date);

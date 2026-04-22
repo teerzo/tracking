@@ -27,6 +27,7 @@ export interface AddTimeEntryInput {
   date: string
   hours: number
   notes?: string
+  travelledToOffice?: boolean
 }
 
 interface AddTimeDialogProps {
@@ -46,6 +47,7 @@ export function AddTimeDialog({
   const [projectId, setProjectId] = React.useState("")
   const [hours, setHours] = React.useState("")
   const [notes, setNotes] = React.useState("")
+  const [travelledToOffice, setTravelledToOffice] = React.useState(false)
   const [date, setDate] = React.useState(() => new Date())
   const [calendarMonth, setCalendarMonth] = React.useState(() => new Date())
 
@@ -61,6 +63,7 @@ export function AddTimeDialog({
       setProjectId("")
       setHours("")
       setNotes("")
+      setTravelledToOffice(false)
       setDate(new Date(initialDate))
       setCalendarMonth(new Date(initialDate))
     }
@@ -75,6 +78,7 @@ export function AddTimeDialog({
       date: toLocalDateString(date),
       hours: h,
       notes: notes.trim() || undefined,
+      travelledToOffice,
     })
     onOpenChange(false)
   }
@@ -101,7 +105,7 @@ export function AddTimeDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-sm">
+      <DialogContent className="max-h-[85vh] max-w-sm overflow-y-auto">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Add time</DialogTitle>
@@ -153,6 +157,18 @@ export function AddTimeDialog({
                 placeholder=""
                 required
               />
+            </Field>
+            <Field orientation="horizontal">
+              <input
+                id="add-time-travelled-to-office"
+                type="checkbox"
+                checked={travelledToOffice}
+                onChange={(e) => setTravelledToOffice(e.target.checked)}
+                className="h-4 w-4 rounded border-input"
+              />
+              <FieldLabel htmlFor="add-time-travelled-to-office">
+                Travelled to office
+              </FieldLabel>
             </Field>
             <Field>
               <FieldLabel>Date</FieldLabel>
