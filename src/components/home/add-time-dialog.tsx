@@ -240,7 +240,7 @@ export function AddTimeDialog({
               </div>
             </Field>
           </FieldGroup>
-          <DialogFooter>
+          <DialogFooter className="flex flex-row justify-end gap-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>

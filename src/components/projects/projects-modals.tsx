@@ -150,7 +150,7 @@ export function ProjectsModals(props: ProjectsModalsProps) {
                 </Select>
               </Field>
             </FieldGroup>
-            <DialogFooter>
+            <DialogFooter className="flex flex-row justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"

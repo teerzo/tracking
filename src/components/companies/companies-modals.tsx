@@ -170,7 +170,7 @@ export function CompaniesModals(props: CompaniesModalsProps) {
                 <FieldLabel htmlFor="add-company-remote-only">Remote only</FieldLabel>
               </Field>
             </FieldGroup>
-            <DialogFooter>
+            <DialogFooter className="flex flex-row justify-end gap-2">
               <Button
                 type="button"
                 variant="outline"
