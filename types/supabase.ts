@@ -18,29 +18,41 @@ export type Database = {
         Row: {
           abn: string | null
           address: string | null
+          billing_contact: string | null
+          billing_email: string | null
           contact_name: string | null
+          distance: string | null
           email: string | null
           id: string
           name: string
           phone: string | null
+          remote_only: boolean
         }
         Insert: {
           abn?: string | null
           address?: string | null
+          billing_contact?: string | null
+          billing_email?: string | null
           contact_name?: string | null
+          distance?: string | null
           email?: string | null
           id?: string
           name: string
           phone?: string | null
+          remote_only?: boolean
         }
         Update: {
           abn?: string | null
           address?: string | null
+          billing_contact?: string | null
+          billing_email?: string | null
           contact_name?: string | null
+          distance?: string | null
           email?: string | null
           id?: string
           name?: string
           phone?: string | null
+          remote_only?: boolean
         }
         Relationships: []
       }
@@ -48,7 +60,6 @@ export type Database = {
         Row: {
           created_at: string
           id: string
-          invoice_name: string | null
           invoice_number: string | null
           period_end: string
           period_start: string
@@ -59,7 +70,6 @@ export type Database = {
         Insert: {
           created_at?: string
           id?: string
-          invoice_name?: string | null
           invoice_number?: string | null
           period_end: string
           period_start: string
@@ -70,7 +80,6 @@ export type Database = {
         Update: {
           created_at?: string
           id?: string
-          invoice_name?: string | null
           invoice_number?: string | null
           period_end?: string
           period_start?: string
@@ -125,6 +134,7 @@ export type Database = {
           notes: string | null
           project_id: string
           time_zone: string | null
+          travelled_to_office: boolean
         }
         Insert: {
           client_offset_minutes?: number | null
@@ -135,6 +145,7 @@ export type Database = {
           notes?: string | null
           project_id: string
           time_zone?: string | null
+          travelled_to_office?: boolean
         }
         Update: {
           client_offset_minutes?: number | null
@@ -145,6 +156,7 @@ export type Database = {
           notes?: string | null
           project_id?: string
           time_zone?: string | null
+          travelled_to_office?: boolean
         }
         Relationships: [
           {
@@ -234,6 +246,7 @@ export type Database = {
           p_notes?: string
           p_project_id: string
           p_time_zone?: string
+          p_travelled_to_office?: boolean
         }
         Returns: {
           client_offset_minutes: number | null
@@ -244,6 +257,7 @@ export type Database = {
           notes: string | null
           project_id: string
           time_zone: string | null
+          travelled_to_office: boolean
         }[]
         SetofOptions: {
           from: "*"
