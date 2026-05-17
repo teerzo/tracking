@@ -1,13 +1,14 @@
 "use client"
 
 import * as React from "react"
+import type { Project, ProjectRow } from "@/lib/projects"
 import { supabase } from "@/lib/supabaseClient"
-import { toProject, type Project, type ProjectRow } from "@/lib/projects"
+import { toProject } from "@/lib/projects"
 
 export type { Project } from "@/lib/projects"
 
 export function useProjects() {
-  const [projects, setProjects] = React.useState<Project[]>([])
+  const [projects, setProjects] = React.useState<Array<Project>>([])
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
 
@@ -19,15 +20,15 @@ export function useProjects() {
       }
       setLoading(true)
       setError(null)
-      const { data, error } = await supabase
+      const { data, error: projectsError } = await supabase
         .from("projects")
         .select("*, company:companies(name)")
         .order("start_date", { ascending: true })
 
-      if (error) {
-        setError(error.message)
+      if (projectsError) {
+        setError(projectsError.message)
         setProjects([])
-      } else if (data) {
+      } else {
         setProjects(data.map((row) => toProject(row as ProjectRow)))
       }
       setLoading(false)

@@ -1,6 +1,8 @@
 "use client"
 
 import * as React from "react"
+import type { Company } from "@/lib/hooks/useCompanies"
+import type { Project } from "@/lib/hooks/useProjects"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -18,13 +20,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { Company } from "@/lib/hooks/useCompanies"
-import type { Project } from "@/lib/hooks/useProjects"
 
 const EMPTY_COMPANY_VALUE = "__none__"
 
 interface ProjectsModalsProps {
-  companies: Company[]
+  companies: Array<Company>
   // Add
   addOpen: boolean
   onAddOpenChange: (open: boolean) => void

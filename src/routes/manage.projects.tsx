@@ -2,16 +2,17 @@
 
 import * as React from "react"
 import { createFileRoute } from "@tanstack/react-router"
-import { Button } from "@/components/ui/button"
 import { PlusIcon } from "lucide-react"
+import type { Project } from "@/lib/hooks/useProjects"
+import type { ProjectRow } from "@/lib/projects"
+import { Button } from "@/components/ui/button"
 import { supabase } from "@/lib/supabaseClient"
 import { useCompanies } from "@/lib/hooks/useCompanies"
-import { useProjects, type Project } from "@/lib/hooks/useProjects"
+import { useProjects } from "@/lib/hooks/useProjects"
 import {
   emptyProjectForm,
   toProject,
   toProjectMutation,
-  type ProjectRow,
 } from "@/lib/projects"
 import { ProjectsTable } from "@/components/projects/projects-table"
 import { ProjectsModals } from "@/components/projects/projects-modals"
@@ -22,7 +23,7 @@ export const Route = createFileRoute("/manage/projects")({
 })
 
 function ManageProjectsPage() {
-  const { projects, setProjects, error } = useProjects()
+  const { projects, setProjects, error: loadError } = useProjects()
   const { companies } = useCompanies()
   const [addOpen, setAddOpen] = React.useState(false)
   const [editProject, setEditProject] = React.useState<Project | null>(null)
@@ -57,16 +58,16 @@ function ManageProjectsPage() {
     let updated = editProject
 
     if (supabase) {
-      const { data, error } = await supabase
+      const { data, error: updateError } = await supabase
         .from("projects")
         .update(payload)
         .eq("id", editProject.id)
         .select("*, company:companies(name)")
         .single()
 
-      if (error) {
-        console.error("Failed to update project", error)
-        setProjectError(error.message)
+      if (updateError) {
+        console.error("Failed to update project", updateError)
+        setProjectError(updateError.message)
         return
       }
 
@@ -120,15 +121,15 @@ function ManageProjectsPage() {
     }
 
     if (supabase) {
-      const { data, error } = await supabase
+      const { data, error: insertError } = await supabase
         .from("projects")
         .insert(payload)
         .select("*, company:companies(name)")
         .single()
 
-      if (error) {
-        console.error("Failed to create project", error)
-        setProjectError(error.message)
+      if (insertError) {
+        console.error("Failed to create project", insertError)
+        setProjectError(insertError.message)
         return
       }
 
@@ -188,9 +189,9 @@ function ManageProjectsPage() {
         onDeleteConfirm={confirmDeleteStep2}
         onDeleteClose={closeDelete}
       />
-      {error && (
+      {loadError && (
         <p className="mb-2 text-sm text-destructive">
-          Failed to load projects from Supabase: {error}
+          Failed to load projects from Supabase: {loadError}
         </p>
       )}
       <ProjectsTable projects={projects} onEdit={openEdit} onDelete={openDelete} />

@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest"
-import { toProject, toProjectMutation, type ProjectRow } from "@/lib/projects"
+import type { ProjectRow } from "@/lib/projects"
+import { toProject, toProjectMutation } from "@/lib/projects"
 
 describe("project helpers", () => {
   it("maps a Supabase project row with joined company data", () => {
