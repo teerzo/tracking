@@ -1,6 +1,8 @@
 "use client"
 
 import * as React from "react"
+import type { Company } from "@/lib/hooks/useCompanies"
+import type { Project } from "@/lib/hooks/useProjects"
 import { Button } from "@/components/ui/button"
 import {
   Dialog,
@@ -18,19 +20,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { Company } from "@/lib/hooks/useCompanies"
-import type { Project } from "@/lib/hooks/useProjects"
 
 const EMPTY_COMPANY_VALUE = "__none__"
 
 interface ProjectsModalsProps {
-  companies: Company[]
+  companies: Array<Company>
   // Add
   addOpen: boolean
   onAddOpenChange: (open: boolean) => void
   newProject: Omit<Project, "id">
   setNewProject: React.Dispatch<React.SetStateAction<Omit<Project, "id">>>
   onAddSubmit: (e: React.FormEvent) => void
+  projectError: string | null
 
   // Edit
   editProject: Project | null
@@ -54,6 +55,7 @@ export function ProjectsModals(props: ProjectsModalsProps) {
     newProject,
     setNewProject,
     onAddSubmit,
+    projectError,
     editProject,
     onEditClose,
     setEditProject,
@@ -126,13 +128,19 @@ export function ProjectsModals(props: ProjectsModalsProps) {
               <Field>
                 <FieldLabel htmlFor="add-company">Company</FieldLabel>
                 <Select
-                  value={newProject.company || EMPTY_COMPANY_VALUE}
-                  onValueChange={(value) =>
+                  value={newProject.companyId || EMPTY_COMPANY_VALUE}
+                  onValueChange={(value) => {
+                    const company =
+                      value === EMPTY_COMPANY_VALUE
+                        ? null
+                        : companies.find((c) => c.id === value)
+
                     setNewProject((p) => ({
                       ...p,
-                      company: value === EMPTY_COMPANY_VALUE ? "" : value,
+                      company: company?.name ?? "",
+                      companyId: company?.id ?? "",
                     }))
-                  }
+                  }}
                 >
                   <SelectTrigger id="add-company" className="w-full">
                     <SelectValue placeholder="Select company" />
@@ -142,13 +150,16 @@ export function ProjectsModals(props: ProjectsModalsProps) {
                       —
                     </SelectItem>
                     {companies.map((c) => (
-                      <SelectItem key={c.id} value={c.name}>
+                      <SelectItem key={c.id} value={c.id}>
                         {c.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </Field>
+              {projectError && (
+                <p className="text-sm text-destructive">{projectError}</p>
+              )}
             </FieldGroup>
             <DialogFooter className="flex flex-row justify-end gap-2">
               <Button
@@ -230,18 +241,23 @@ export function ProjectsModals(props: ProjectsModalsProps) {
                 <Field>
                   <FieldLabel htmlFor="edit-company">Company</FieldLabel>
                   <Select
-                    value={editProject.company || EMPTY_COMPANY_VALUE}
-                    onValueChange={(value) =>
+                    value={editProject.companyId || EMPTY_COMPANY_VALUE}
+                    onValueChange={(value) => {
+                      const company =
+                        value === EMPTY_COMPANY_VALUE
+                          ? null
+                          : companies.find((c) => c.id === value)
+
                       setEditProject((p) =>
                         p
                           ? {
                               ...p,
-                              company:
-                                value === EMPTY_COMPANY_VALUE ? "" : value,
+                              company: company?.name ?? "",
+                              companyId: company?.id ?? "",
                             }
                           : null,
                       )
-                    }
+                    }}
                   >
                     <SelectTrigger id="edit-company" className="w-full">
                       <SelectValue placeholder="Select company" />
@@ -251,13 +267,16 @@ export function ProjectsModals(props: ProjectsModalsProps) {
                         —
                       </SelectItem>
                       {companies.map((c) => (
-                        <SelectItem key={c.id} value={c.name}>
+                        <SelectItem key={c.id} value={c.id}>
                           {c.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </Field>
+                {projectError && (
+                  <p className="text-sm text-destructive">{projectError}</p>
+                )}
               </FieldGroup>
             )}
             <DialogFooter>
