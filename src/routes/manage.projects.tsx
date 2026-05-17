@@ -28,7 +28,7 @@ function ManageProjectsPage() {
 
   const saveEdit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!editProject) return
+    if (!editProject?.companyId) return
     try {
       if (supabase) {
         const { error } = await supabase
@@ -38,19 +38,22 @@ function ManageProjectsPage() {
             start_date: editProject.startDate || null,
             end_date: editProject.endDate || null,
             hourly_rate: editProject.hourlyRate,
-            company: editProject.company,
+            company_id: editProject.companyId,
           })
           .eq("id", editProject.id)
 
         if (error) {
           console.error("Failed to update project", error)
+          return
         }
       }
-    } finally {
+
       setProjects((prev) =>
         prev.map((p) => (p.id === editProject.id ? editProject : p))
       )
       closeEdit()
+    } catch (err) {
+      console.error("Failed to update project", err)
     }
   }
 
@@ -62,6 +65,11 @@ function ManageProjectsPage() {
     company: "",
     companyId: "",
   })
+
+  const companyNameById = React.useMemo(
+    () => new Map(companies.map((c) => [c.id, c.name])),
+    [companies]
+  )
 
   const openAdd = () => {
     setNewProject({
@@ -84,7 +92,7 @@ function ManageProjectsPage() {
 
   const saveAdd = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!newProject.projectName.trim()) return
+    if (!newProject.projectName.trim() || !newProject.companyId) return
     let created: Project | null = null
 
     try {
@@ -96,22 +104,38 @@ function ManageProjectsPage() {
             start_date: newProject.startDate || null,
             end_date: newProject.endDate || null,
             hourly_rate: newProject.hourlyRate,
-            company: newProject.company,
+            company_id: newProject.companyId,
           })
-          .select("*")
+          .select(
+            `
+            id,
+            project_name,
+            start_date,
+            end_date,
+            hourly_rate,
+            company_id,
+            companies (
+              name
+            )
+          `
+          )
           .single()
 
         if (error) {
           console.error("Failed to create project", error)
         } else if (data) {
+          const company = data.companies as { name?: string } | null
           created = {
             id: data.id as string,
             projectName: data.project_name as string,
             startDate: data.start_date ?? "",
             endDate: data.end_date ?? "",
             hourlyRate: Number(data.hourly_rate ?? 0),
-            company: data.company ?? "",
-            companyId: data.company_id ?? "",
+            company:
+              company?.name ??
+              companyNameById.get(data.company_id as string) ??
+              "",
+            companyId: data.company_id as string,
           }
         }
       }

@@ -28,23 +28,37 @@ export function useProjects() {
       setError(null)
       const { data, error } = await supabase
         .from("projects")
-        .select("*")
+        .select(
+          `
+          id,
+          project_name,
+          start_date,
+          end_date,
+          hourly_rate,
+          company_id,
+          companies (
+            name
+          )
+        `
+        )
         .order("start_date", { ascending: true })
 
       if (error) {
         setError(error.message)
         setProjects([])
       } else if (data) {
-        console.log("data", data)
-        const mapped = data.map((row: any) => ({
-          id: row.id as string,
-          projectName: row.project_name as string,
-          startDate: row.start_date ?? "",
-          endDate: row.end_date ?? "",
-          hourlyRate: Number(row.hourly_rate ?? 0),
-          company: row.company ?? "",
-          companyId: (row.company_id as string) ?? "",
-        }))
+        const mapped = data.map((row) => {
+          const company = row.companies as { name?: string } | null
+          return {
+            id: row.id as string,
+            projectName: row.project_name as string,
+            startDate: row.start_date ?? "",
+            endDate: row.end_date ?? "",
+            hourlyRate: Number(row.hourly_rate ?? 0),
+            company: company?.name ?? "",
+            companyId: (row.company_id as string) ?? "",
+          }
+        })
         setProjects(mapped)
       }
       setLoading(false)

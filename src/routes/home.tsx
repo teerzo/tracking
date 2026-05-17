@@ -18,6 +18,7 @@ import {
 import { Field, FieldGroup, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import {
+  Building2,
   CalendarDays,
   ChevronLeft,
   ChevronRight,
@@ -126,6 +127,14 @@ export function HomePage() {
       m.set(e.date, (m.get(e.date) ?? 0) + e.hours)
     }
     return m
+  }, [entries])
+
+  const officeDaysByDate = React.useMemo(() => {
+    const dates = new Set<string>()
+    for (const e of entries) {
+      if (e.travelledToOffice) dates.add(e.date)
+    }
+    return dates
   }, [entries])
 
   const monthGridCells = React.useMemo(() => {
@@ -359,20 +368,38 @@ export function HomePage() {
                       const inCurrentMonth =
                         cell.getMonth() === selectedDate.getMonth() &&
                         cell.getFullYear() === selectedDate.getFullYear()
+                      const travelledToOffice = officeDaysByDate.has(cellKey)
+                      const dayHours = hoursByDate.get(cellKey) ?? 0
                       return (
                         <button
                           key={`${rowIdx}-${cellKey}`}
                           type="button"
                           onClick={() => setSelectedDate(new Date(cell))}
+                          aria-label={
+                            travelledToOffice
+                              ? `${cellKey}, travelled to office`
+                              : cellKey
+                          }
                           className={cn(
-                            'flex min-h-14 flex-col items-center justify-center rounded-md border border-transparent px-1 py-2 text-sm transition-colors hover:bg-muted',
+                            'relative flex min-h-16 flex-col items-center justify-center gap-0.5 rounded-md border px-1 py-2 text-sm transition-colors hover:bg-muted',
                             inCurrentMonth ? 'text-foreground' : 'text-muted-foreground/80',
+                            travelledToOffice
+                              ? 'border-sky-500/50 bg-sky-500/15'
+                              : 'border-transparent',
                             cellKey === selectedDateStr &&
                               'border-primary bg-primary/5 font-medium text-foreground',
                           )}
                         >
-                          <span>{cell.getDate()}</span>
-                          {(hoursByDate.get(cellKey) ?? 0) > 0 && (
+                          {travelledToOffice && (
+                            <span className="absolute top-1 right-1 inline-flex items-center gap-0.5 rounded-full bg-sky-600 px-1 py-0.5 text-[9px] font-medium leading-none text-white dark:bg-sky-500">
+                              <Building2 className="size-2.5 shrink-0" aria-hidden />
+                              Office
+                            </span>
+                          )}
+                          <span className={cn(travelledToOffice && 'mt-2')}>
+                            {cell.getDate()}
+                          </span>
+                          {dayHours > 0 && (
                             <span
                               className={cn(
                                 'text-[10px] leading-tight',
@@ -381,7 +408,7 @@ export function HomePage() {
                                   : 'text-muted-foreground/70',
                               )}
                             >
-                              {formatHours(hoursByDate.get(cellKey) ?? 0)} h
+                              {formatHours(dayHours)} h
                             </span>
                           )}
                         </button>
@@ -401,7 +428,18 @@ export function HomePage() {
                 {formatHours(
                   entriesForDay.reduce((sum, e) => sum + e.hours, 0),
                 )}{' '}
-                hrs ·{' '}
+                hrs
+                {officeDaysByDate.has(selectedDateStr) && (
+                  <>
+                    {' '}
+                    ·{' '}
+                    <span className="inline-flex items-center gap-1 text-sky-600 dark:text-sky-400">
+                      <Building2 className="size-3" aria-hidden />
+                      Office
+                    </span>
+                  </>
+                )}{' '}
+                ·{' '}
                 <button
                   type="button"
                   className="font-medium text-foreground underline-offset-4 hover:underline"

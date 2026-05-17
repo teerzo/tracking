@@ -126,23 +126,29 @@ export function ProjectsModals(props: ProjectsModalsProps) {
               <Field>
                 <FieldLabel htmlFor="add-company">Company</FieldLabel>
                 <Select
-                  value={newProject.company || EMPTY_COMPANY_VALUE}
-                  onValueChange={(value) =>
+                  value={newProject.companyId || EMPTY_COMPANY_VALUE}
+                  onValueChange={(value) => {
+                    const companyId =
+                      value === EMPTY_COMPANY_VALUE ? "" : value
+                    const company =
+                      companies.find((c) => c.id === companyId)?.name ?? ""
                     setNewProject((p) => ({
                       ...p,
-                      company: value === EMPTY_COMPANY_VALUE ? "" : value,
+                      companyId,
+                      company,
                     }))
-                  }
+                  }}
+                  required
                 >
                   <SelectTrigger id="add-company" className="w-full">
                     <SelectValue placeholder="Select company" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={EMPTY_COMPANY_VALUE}>
-                      —
+                    <SelectItem value={EMPTY_COMPANY_VALUE} disabled>
+                      Select company
                     </SelectItem>
                     {companies.map((c) => (
-                      <SelectItem key={c.id} value={c.name}>
+                      <SelectItem key={c.id} value={c.id}>
                         {c.name}
                       </SelectItem>
                     ))}
@@ -230,28 +236,33 @@ export function ProjectsModals(props: ProjectsModalsProps) {
                 <Field>
                   <FieldLabel htmlFor="edit-company">Company</FieldLabel>
                   <Select
-                    value={editProject.company || EMPTY_COMPANY_VALUE}
-                    onValueChange={(value) =>
+                    value={editProject.companyId || EMPTY_COMPANY_VALUE}
+                    onValueChange={(value) => {
+                      const companyId =
+                        value === EMPTY_COMPANY_VALUE ? "" : value
+                      const company =
+                        companies.find((c) => c.id === companyId)?.name ?? ""
                       setEditProject((p) =>
                         p
                           ? {
                               ...p,
-                              company:
-                                value === EMPTY_COMPANY_VALUE ? "" : value,
+                              companyId,
+                              company,
                             }
                           : null,
                       )
-                    }
+                    }}
+                    required
                   >
                     <SelectTrigger id="edit-company" className="w-full">
                       <SelectValue placeholder="Select company" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={EMPTY_COMPANY_VALUE}>
-                        —
+                      <SelectItem value={EMPTY_COMPANY_VALUE} disabled>
+                        Select company
                       </SelectItem>
                       {companies.map((c) => (
-                        <SelectItem key={c.id} value={c.name}>
+                        <SelectItem key={c.id} value={c.id}>
                           {c.name}
                         </SelectItem>
                       ))}
