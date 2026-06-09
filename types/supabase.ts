@@ -89,6 +89,38 @@ export type Database = {
         }
         Relationships: []
       }
+      project_rates: {
+        Row: {
+          end_date: string | null
+          hourly_rate: number
+          id: string
+          project_id: string
+          start_date: string
+        }
+        Insert: {
+          end_date?: string | null
+          hourly_rate?: number
+          id?: string
+          project_id: string
+          start_date: string
+        }
+        Update: {
+          end_date?: string | null
+          hourly_rate?: number
+          id?: string
+          project_id?: string
+          start_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_rates_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       projects: {
         Row: {
           company_id: string
