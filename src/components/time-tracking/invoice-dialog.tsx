@@ -39,8 +39,10 @@ import {
   filterEntriesByDateRange,
   filterEntriesByProjects,
   aggregateEntriesForInvoice,
+  formatDateLocal,
   formatHours,
   formatCurrency,
+  parseDate,
 } from "@/lib/time-tracking"
 import { buildInvoiceHtml, openInvoicePdf } from "@/lib/build-invoice-html"
 import { useCompanies } from "@/lib/hooks/useCompanies"
@@ -52,6 +54,7 @@ interface InvoiceDialogProps {
   projectRates: ProjectRate[]
   entries: TimeEntry[]
   selectedDateStr: string
+  onRefetchRates?: () => Promise<ProjectRate[] | void>
 }
 
 const ALL_COMPANIES_VALUE = "__all__"
@@ -61,6 +64,7 @@ export function InvoiceDialog({
   projectRates,
   entries,
   selectedDateStr,
+  onRefetchRates,
 }: InvoiceDialogProps) {
   const { settings } = useUserSettings()
   const { companies } = useCompanies()
@@ -72,13 +76,34 @@ export function InvoiceDialog({
     if (open) {
       setStart(selectedDateStr)
       setEnd(selectedDateStr)
+      void onRefetchRates?.()
     }
-  }, [open, selectedDateStr])
+  }, [open, selectedDateStr, onRefetchRates])
   const [selectedCompanyId, setSelectedCompanyId] =
     React.useState<string>(ALL_COMPANIES_VALUE)
   const [selectedProjectIds, setSelectedProjectIds] = React.useState<string[]>(
     []
   )
+  const [invoiceRates, setInvoiceRates] =
+    React.useState<ProjectRate[]>(projectRates)
+
+  React.useEffect(() => {
+    setInvoiceRates(projectRates)
+  }, [projectRates])
+
+  React.useEffect(() => {
+    if (!open) return
+    let cancelled = false
+    void (async () => {
+      const rates = await onRefetchRates?.()
+      if (!cancelled && rates && rates.length > 0) {
+        setInvoiceRates(rates)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [open, onRefetchRates])
 
   const filteredProjects = React.useMemo(() => {
     if (selectedCompanyId === ALL_COMPANIES_VALUE) return projects
@@ -88,17 +113,23 @@ export function InvoiceDialog({
   const invoiceEntries = React.useMemo(() => {
     if (!start || !end) return [] as TimeEntry[]
     let filtered = filterEntriesByDateRange(entries, start, end)
+    if (selectedCompanyId !== ALL_COMPANIES_VALUE) {
+      filtered = filtered.filter((e) => {
+        const project = projects.find((p) => p.id === e.projectId)
+        return project?.companyId === selectedCompanyId
+      })
+    }
     if (selectedProjectIds.length > 0) {
       filtered = filterEntriesByProjects(filtered, selectedProjectIds)
     }
     return filtered
-  }, [entries, start, end, selectedProjectIds])
+  }, [entries, start, end, selectedProjectIds, selectedCompanyId, projects])
 
   const summary = React.useMemo<InvoiceSummary | null>(() => {
     if (!start || !end) return null
     if (invoiceEntries.length === 0) return null
-    return aggregateEntriesForInvoice(invoiceEntries, projects, projectRates)
-  }, [invoiceEntries, projects, projectRates, start, end])
+    return aggregateEntriesForInvoice(invoiceEntries, projects, invoiceRates)
+  }, [invoiceEntries, projects, invoiceRates, start, end])
 
   const weeklyBreakdown = React.useMemo(() => {
     if (invoiceEntries.length === 0) return [] as { weekStart: string; days: number[] }[]
@@ -111,8 +142,8 @@ export function InvoiceDialog({
     const dates = Array.from(dailyMap.keys()).sort()
     if (dates.length === 0) return [] as { weekStart: string; days: number[] }[]
 
-    const firstDate = new Date(dates[0]!)
-    const lastDate = new Date(dates[dates.length - 1]!)
+    const firstDate = parseDate(dates[0]!)
+    const lastDate = parseDate(dates[dates.length - 1]!)
 
     const firstMonday = new Date(firstDate)
     const firstDay = firstMonday.getDay()
@@ -135,11 +166,11 @@ export function InvoiceDialog({
       for (let i = 0; i < 7; i++) {
         const d = new Date(weekStart)
         d.setDate(weekStart.getDate() + i)
-        const iso = d.toISOString().slice(0, 10)
+        const iso = formatDateLocal(d)
         days.push(dailyMap.get(iso) ?? 0)
       }
       weeks.push({
-        weekStart: weekStart.toISOString().slice(0, 10),
+        weekStart: formatDateLocal(weekStart),
         days,
       })
     }
@@ -167,7 +198,14 @@ export function InvoiceDialog({
   }
 
   const handlePrint = async () => {
-    if (!summary) return
+    if (!start || !end || invoiceEntries.length === 0) return
+
+    const rates = (await onRefetchRates?.()) ?? projectRates
+    const printSummary = aggregateEntriesForInvoice(
+      invoiceEntries,
+      projects,
+      rates
+    )
 
     const invoiceDate = new Date().toISOString().slice(0, 10)
     const invoiceDueDate = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000)
@@ -206,9 +244,11 @@ export function InvoiceDialog({
         userData = userRow ?? null
       }
 
-      const firstProjectId = summary.lines[0]?.projectId
-      const firstProject = projects.find((p) => p.id === firstProjectId)
-      const companyId = firstProject?.companyId
+      const companyId =
+        selectedCompanyId !== ALL_COMPANIES_VALUE
+          ? selectedCompanyId
+          : projects.find((p) => p.id === printSummary.lines[0]?.projectId)
+              ?.companyId
       if (companyId) {
         const { data: companyRow } = await supabase
           .from("companies")
@@ -222,7 +262,7 @@ export function InvoiceDialog({
     const user = userData
     const company = companyData
 
-    const subtotal = summary.totalAmount
+    const subtotal = printSummary.totalAmount
     const chargeGst = settings.chargeGst
     const gstAmount = settings.gstAmount
     const gst = chargeGst
@@ -237,7 +277,7 @@ export function InvoiceDialog({
         invoice_number: invoiceNumber,
         period_start: start,
         period_end: end,
-        total_hours: summary.totalHours,
+        total_hours: printSummary.totalHours,
         total_amount: total,
         status: "draft",
       })
@@ -248,7 +288,7 @@ export function InvoiceDialog({
     }
 
     const html = buildInvoiceHtml({
-      summary,
+      summary: printSummary,
       start,
       end,
       invoiceNumber,
@@ -387,6 +427,13 @@ export function InvoiceDialog({
             <h3 className="mb-3 font-medium">Invoice preview</h3>
             {summary ? (
               <>
+                {invoiceRates.length === 0 ? (
+                  <p className="text-destructive mb-3 text-sm">
+                    No pay rate schedule loaded. Amounts use each project&apos;s
+                    current rate only — add rate periods under Manage → Projects
+                    to split lines when rates change mid-period.
+                  </p>
+                ) : null}
                 {summary.unmatchedEntryCount > 0 ? (
                   <p className="text-destructive mb-3 text-sm">
                     {summary.unmatchedEntryCount} time{" "}
@@ -413,10 +460,10 @@ export function InvoiceDialog({
                     <tbody>
                       {summary.lines.map((line) => (
                         <tr
-                          key={`${line.projectId}-${line.hourlyRate}`}
+                          key={`${line.projectId}-${line.ratePeriodStart ?? "fallback"}-${line.hourlyRate}`}
                           className="border-t"
                         >
-                          <td>{line.projectName}</td>
+                          <td>{line.displayName}</td>
                           <td>{formatCurrency(line.hourlyRate)}/hr</td>
                           <td>{formatHours(line.hours)}</td>
                           <td>{formatCurrency(line.amount)}</td>
@@ -429,30 +476,34 @@ export function InvoiceDialog({
                         <td>{formatHours(summary.totalHours)}</td>
                         <td>{formatCurrency(summary.totalAmount)}</td>
                       </tr>
-                      <tr>
-                        <td colSpan={2}>GST ({settings.gstAmount}%)</td>
-                        <td></td>
-                        <td>
-                          {formatCurrency(
-                            Math.round(
-                              summary.totalAmount *
-                                (settings.gstAmount / 100) *
-                                100
-                            ) / 100
-                          )}
-                        </td>
-                      </tr>
+                      {settings.chargeGst ? (
+                        <tr>
+                          <td colSpan={2}>GST ({settings.gstAmount}%)</td>
+                          <td></td>
+                          <td>
+                            {formatCurrency(
+                              Math.round(
+                                summary.totalAmount *
+                                  (settings.gstAmount / 100) *
+                                  100
+                              ) / 100
+                            )}
+                          </td>
+                        </tr>
+                      ) : null}
                       <tr className="border-t font-medium">
                         <td colSpan={2}>Total</td>
                         <td>{formatHours(summary.totalHours)}</td>
                         <td>
                           {formatCurrency(
-                            Math.round(
-                              (summary.totalAmount +
-                                summary.totalAmount *
-                                  (settings.gstAmount / 100)) *
-                                100
-                            ) / 100
+                            settings.chargeGst
+                              ? Math.round(
+                                  (summary.totalAmount +
+                                    summary.totalAmount *
+                                      (settings.gstAmount / 100)) *
+                                    100
+                                ) / 100
+                              : Math.round(summary.totalAmount * 100) / 100
                           )}
                         </td>
                       </tr>

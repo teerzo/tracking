@@ -98,7 +98,7 @@ export function buildInvoiceHtml(params: {
         .map(
           (l) =>
             `<tr style="border-bottom:1px solid #eee">
-        <td style="padding:0.5rem">${l.projectName}</td>
+        <td style="padding:0.5rem">${l.displayName}</td>
         <td style="padding:0.5rem">${formatCurrency(l.hourlyRate)}/hr</td>
         <td style="padding:0.5rem">${formatHours(l.hours)}</td>
         <td style="padding:0.5rem;text-align:end">${formatCurrency(l.amount)}</td>

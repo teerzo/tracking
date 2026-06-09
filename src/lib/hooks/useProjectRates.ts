@@ -8,6 +8,11 @@ import {
   type ProjectRate,
 } from "@/lib/time-tracking"
 
+function toDateOnly(value: string | null): string | null {
+  if (!value) return null
+  return value.slice(0, 10)
+}
+
 function mapRow(row: {
   id: string
   project_id: string
@@ -18,8 +23,8 @@ function mapRow(row: {
   return {
     id: row.id,
     projectId: row.project_id,
-    startDate: row.start_date,
-    endDate: row.end_date,
+    startDate: toDateOnly(row.start_date) ?? row.start_date,
+    endDate: toDateOnly(row.end_date),
     hourlyRate: Number(row.hourly_rate ?? 0),
   }
 }
@@ -37,10 +42,10 @@ export function useProjectRates() {
   const [loading, setLoading] = React.useState(true)
   const [error, setError] = React.useState<string | null>(null)
 
-  const fetchRates = React.useCallback(async () => {
+  const fetchRates = React.useCallback(async (): Promise<ProjectRate[]> => {
     if (!supabase) {
       setLoading(false)
-      return
+      return []
     }
     setLoading(true)
     setError(null)
@@ -52,10 +57,14 @@ export function useProjectRates() {
     if (fetchError) {
       setError(fetchError.message)
       setRates([])
-    } else {
-      setRates((data ?? []).map(mapRow))
+      setLoading(false)
+      return []
     }
+
+    const mapped = (data ?? []).map(mapRow)
+    setRates(mapped)
     setLoading(false)
+    return mapped
   }, [])
 
   React.useEffect(() => {

@@ -32,7 +32,7 @@ function ManageInvoicesPage() {
   const { invoices, setInvoices, loading, error } = useInvoices()
   const { entries } = useTimeEntries()
   const { projects } = useProjects()
-  const { rates: projectRates } = useProjectRates()
+  const { rates: projectRates, refetch: refetchProjectRates } = useProjectRates()
   const today = React.useMemo(() => new Date().toISOString().slice(0, 10), [])
   const projectsForHeader = React.useMemo(
     () =>
@@ -53,6 +53,7 @@ function ManageInvoicesPage() {
       projectRates={projectRates}
       entries={entries}
       selectedDateStr={today}
+      onRefetchRates={refetchProjectRates}
     />
   )
 
@@ -78,6 +79,8 @@ function ManageInvoicesPage() {
 
   const handleView = React.useCallback(
     async (inv: Invoice) => {
+      const ratesForInvoice = await refetchProjectRates()
+
       let chargeGst = false
       let gstAmount = 10
 
@@ -112,7 +115,7 @@ function ManageInvoicesPage() {
       const summary = aggregateEntriesForInvoice(
         filtered,
         projectsForInvoice,
-        projectRates
+        ratesForInvoice
       )
 
       if (summary.lines.length === 0) {
@@ -124,6 +127,7 @@ function ManageInvoicesPage() {
         summary.lines.push({
           projectId: "",
           projectName: "No project breakdown available",
+          displayName: "No project breakdown available",
           hourlyRate: 0,
           hours: inv.totalHours,
           amount: subtotal,
@@ -202,7 +206,7 @@ function ManageInvoicesPage() {
       })
       openInvoicePdf(html, { printAndClose: true })
     },
-    [entries, projects, projectRates]
+    [entries, projects, refetchProjectRates]
   )
 
   return (
