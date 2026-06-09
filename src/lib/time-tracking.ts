@@ -22,10 +22,19 @@ export interface InvoiceLine {
   amount: number
 }
 
+export interface ProjectRate {
+  id: string
+  projectId: string
+  startDate: string
+  endDate: string | null
+  hourlyRate: number
+}
+
 export interface InvoiceSummary {
   lines: InvoiceLine[]
   totalHours: number
   totalAmount: number
+  unmatchedEntryCount: number
 }
 
 const ID_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789"
@@ -38,9 +47,32 @@ export function generateId(): string {
 }
 
 export function parseDate(dateStr: string): Date {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) {
+    const [y, m, d] = dateStr.split("-").map(Number)
+    const date = new Date(y!, m! - 1, d!)
+    date.setHours(0, 0, 0, 0)
+    return date
+  }
   const d = new Date(dateStr)
   d.setHours(0, 0, 0, 0)
   return d
+}
+
+export function formatDateLocal(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, "0")
+  const day = String(d.getDate()).padStart(2, "0")
+  return `${y}-${m}-${day}`
+}
+
+export function todayDateString(): string {
+  return formatDateLocal(new Date())
+}
+
+export function addOneDay(dateStr: string): string {
+  const d = parseDate(dateStr)
+  d.setDate(d.getDate() + 1)
+  return formatDateLocal(d)
 }
 
 export function isInDateRange(
@@ -70,27 +102,130 @@ export function filterEntriesByProjects(
   return entries.filter((e) => set.has(e.projectId))
 }
 
+function ratePeriodEndTime(endDate: string | null): number {
+  if (endDate === null) return Number.POSITIVE_INFINITY
+  return parseDate(endDate).getTime()
+}
+
+export function isDateInRatePeriod(
+  dateStr: string,
+  rate: Pick<ProjectRate, "startDate" | "endDate">
+): boolean {
+  const d = parseDate(dateStr).getTime()
+  const start = parseDate(rate.startDate).getTime()
+  const end = ratePeriodEndTime(rate.endDate)
+  return d >= start && d <= end
+}
+
+export function getRateForDate(
+  projectId: string,
+  dateStr: string,
+  rates: ProjectRate[],
+  fallbackRate: number
+): { rate: number; matched: boolean } {
+  const matching = rates
+    .filter((r) => r.projectId === projectId && isDateInRatePeriod(dateStr, r))
+    .sort(
+      (a, b) =>
+        parseDate(b.startDate).getTime() - parseDate(a.startDate).getTime()
+    )
+
+  if (matching.length > 0) {
+    return { rate: matching[0]!.hourlyRate, matched: true }
+  }
+
+  return { rate: fallbackRate, matched: false }
+}
+
+function periodsOverlap(
+  a: Pick<ProjectRate, "startDate" | "endDate">,
+  b: Pick<ProjectRate, "startDate" | "endDate">
+): boolean {
+  const aStart = parseDate(a.startDate).getTime()
+  const aEnd = ratePeriodEndTime(a.endDate)
+  const bStart = parseDate(b.startDate).getTime()
+  const bEnd = ratePeriodEndTime(b.endDate)
+  return aStart <= bEnd && bStart <= aEnd
+}
+
+export function validateRatePeriods(
+  rates: ProjectRate[],
+  projectId?: string
+): string | null {
+  const scoped = projectId
+    ? rates.filter((r) => r.projectId === projectId)
+    : rates
+
+  const ongoing = scoped.filter((r) => r.endDate === null)
+  if (ongoing.length > 1) {
+    return "Only one ongoing rate period is allowed per project."
+  }
+
+  for (const rate of scoped) {
+    if (rate.endDate !== null && parseDate(rate.endDate) < parseDate(rate.startDate)) {
+      return "End date must be on or after start date."
+    }
+  }
+
+  for (let i = 0; i < scoped.length; i++) {
+    for (let j = i + 1; j < scoped.length; j++) {
+      if (periodsOverlap(scoped[i]!, scoped[j]!)) {
+        return "Rate periods cannot overlap."
+      }
+    }
+  }
+
+  return null
+}
+
+export function subtractOneDay(dateStr: string): string {
+  const d = parseDate(dateStr)
+  d.setDate(d.getDate() - 1)
+  return formatDateLocal(d)
+}
+
+export function suggestedNewRateStartDate(rates: ProjectRate[]): string {
+  const today = todayDateString()
+  const ongoing = rates.find((r) => r.endDate === null)
+  if (!ongoing) return today
+
+  const dayAfterOngoingStart = addOneDay(ongoing.startDate)
+  return dayAfterOngoingStart > today ? dayAfterOngoingStart : today
+}
+
 export function aggregateEntriesForInvoice(
   entries: TimeEntry[],
-  projects: Project[]
+  projects: Project[],
+  rates: ProjectRate[] = []
 ): InvoiceSummary {
   const projectMap = new Map(projects.map((p) => [p.id, p]))
   const agg = new Map<
     string,
     { projectId: string; projectName: string; hourlyRate: number; hours: number }
   >()
+  let unmatchedEntryCount = 0
 
   for (const e of entries) {
     const p = projectMap.get(e.projectId)
     if (!p) continue
-    const cur = agg.get(e.projectId)
+
+    const { rate, matched } = getRateForDate(
+      e.projectId,
+      e.date,
+      rates,
+      p.hourlyRate
+    )
+    if (!matched) unmatchedEntryCount++
+
+    const key = `${e.projectId}:${rate}`
+    const cur = agg.get(key)
     if (cur) {
       cur.hours += e.hours
     } else {
-      agg.set(e.projectId, {
+      agg.set(key, {
         projectId: p.id,
         projectName: p.name,
-        hourlyRate: p.hourlyRate,
+        hourlyRate: rate,
         hours: e.hours,
       })
     }
@@ -115,7 +250,7 @@ export function aggregateEntriesForInvoice(
 
   totalAmount = Math.round(totalAmount * 100) / 100
 
-  return { lines, totalHours, totalAmount }
+  return { lines, totalHours, totalAmount, unmatchedEntryCount }
 }
 
 export function formatHours(hours: number): string {

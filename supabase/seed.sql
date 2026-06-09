@@ -11,6 +11,13 @@ values
   ('a0964ccc-02f5-46cd-9651-d35320fdc1ae'::uuid, 'Apellis - Dashboard', '2025-02-01', '2025-05-15', 60.00, '00000000-0000-0000-0000-000000000001'::uuid),
   ('835214b5-24d5-463a-89a2-6719320e7324'::uuid, 'Health Agent - iConnect', '2025-02-01', '2025-05-15', 60.00, '00000000-0000-0000-0000-000000000001'::uuid);
 
+-- Seed project rate schedules (null end_date = ongoing current rate)
+insert into public.project_rates (id, project_id, start_date, end_date, hourly_rate)
+values
+  ('f1000001-0000-4000-8000-000000000001'::uuid, 'e3bbaec5-b1b2-4833-8315-14345f67c0b7'::uuid, '2025-01-15', null, 60.00),
+  ('f1000002-0000-4000-8000-000000000002'::uuid, 'a0964ccc-02f5-46cd-9651-d35320fdc1ae'::uuid, '2025-02-01', null, 60.00),
+  ('f1000003-0000-4000-8000-000000000003'::uuid, '835214b5-24d5-463a-89a2-6719320e7324'::uuid, '2025-02-01', null, 60.00);
+
 -- Seed user (via public.create_user): a@a.com / abc123
 select public.create_user(
   'a@a.com',

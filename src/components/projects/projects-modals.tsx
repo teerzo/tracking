@@ -18,8 +18,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { ProjectRateSchedule } from "@/components/projects/project-rate-schedule"
 import type { Company } from "@/lib/hooks/useCompanies"
 import type { Project } from "@/lib/hooks/useProjects"
+import type { ProjectRate } from "@/lib/time-tracking"
 
 const EMPTY_COMPANY_VALUE = "__none__"
 
@@ -37,6 +39,13 @@ interface ProjectsModalsProps {
   onEditClose: () => void
   setEditProject: React.Dispatch<React.SetStateAction<Project | null>>
   onEditSubmit: (e: React.FormEvent) => void
+  editProjectRates: ProjectRate[]
+  onInsertRate: (
+    input: Omit<ProjectRate, "id">
+  ) => Promise<{ rate: ProjectRate | null; error: string | null }>
+  onUpdateRate: (rate: ProjectRate) => Promise<{ error: string | null }>
+  onDeleteRate: (rateId: string) => Promise<{ error: string | null }>
+  onRatesChanged?: (rate?: ProjectRate) => void
 
   // Delete
   deleteProject: Project | null
@@ -58,6 +67,11 @@ export function ProjectsModals(props: ProjectsModalsProps) {
     onEditClose,
     setEditProject,
     onEditSubmit,
+    editProjectRates,
+    onInsertRate,
+    onUpdateRate,
+    onDeleteRate,
+    onRatesChanged,
     deleteProject,
     deleteConfirmStep,
     onDeleteBackToStep1,
@@ -174,7 +188,7 @@ export function ProjectsModals(props: ProjectsModalsProps) {
 
       {/* Edit project */}
       <Dialog open={!!editProject} onOpenChange={(open) => !open && onEditClose()}>
-        <DialogContent className="max-h-[85vh] max-w-sm overflow-y-auto">
+        <DialogContent className="max-h-[85vh] max-w-lg overflow-y-auto">
           <form onSubmit={onEditSubmit}>
             <DialogHeader>
               <DialogTitle>Edit project</DialogTitle>
@@ -215,20 +229,6 @@ export function ProjectsModals(props: ProjectsModalsProps) {
                     onChange={(e) =>
                       setEditProject((p) =>
                         p ? { ...p, endDate: e.target.value } : null,
-                      )
-                    }
-                  />
-                </Field>
-                <Field>
-                  <FieldLabel htmlFor="edit-hourly-rate">Hourly rate</FieldLabel>
-                  <Input
-                    id="edit-hourly-rate"
-                    type="number"
-                    min={0}
-                    value={editProject.hourlyRate}
-                    onChange={(e) =>
-                      setEditProject((p) =>
-                        p ? { ...p, hourlyRate: Number(e.target.value) || 0 } : null,
                       )
                     }
                   />
@@ -278,6 +278,16 @@ export function ProjectsModals(props: ProjectsModalsProps) {
               <Button type="submit">Save</Button>
             </DialogFooter>
           </form>
+          {editProject ? (
+            <ProjectRateSchedule
+              projectId={editProject.id}
+              rates={editProjectRates}
+              onInsert={onInsertRate}
+              onUpdate={onUpdateRate}
+              onDelete={onDeleteRate}
+              onRatesChanged={onRatesChanged}
+            />
+          ) : null}
         </DialogContent>
       </Dialog>
 

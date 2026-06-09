@@ -6,7 +6,9 @@ import { Button } from "@/components/ui/button"
 import { PlusIcon } from "lucide-react"
 import { supabase } from "@/lib/supabaseClient"
 import { useCompanies } from "@/lib/hooks/useCompanies"
+import { useProjectRates } from "@/lib/hooks/useProjectRates"
 import { useProjects, type Project } from "@/lib/hooks/useProjects"
+import type { ProjectRate } from "@/lib/time-tracking"
 import { ProjectsTable } from "@/components/projects/projects-table"
 import { ProjectsModals } from "@/components/projects/projects-modals"
 import { useManageHeaderAction } from "@/components/manage-header-action"
@@ -17,6 +19,13 @@ export const Route = createFileRoute("/manage/projects")({
 
 function ManageProjectsPage() {
   const { projects, setProjects, error } = useProjects()
+  const {
+    getRatesForProject,
+    insertRate,
+    updateRate,
+    deleteRate,
+    refetch: refetchRates,
+  } = useProjectRates()
   const { companies } = useCompanies()
   const [addOpen, setAddOpen] = React.useState(false)
   const [editProject, setEditProject] = React.useState<Project | null>(null)
@@ -25,6 +34,34 @@ function ManageProjectsPage() {
 
   const openEdit = (p: Project) => setEditProject({ ...p })
   const closeEdit = () => setEditProject(null)
+
+  const editProjectRates = React.useMemo(
+    () => (editProject ? getRatesForProject(editProject.id) : []),
+    [editProject, getRatesForProject]
+  )
+
+  const handleRatesChanged = React.useCallback(
+    (newRate?: ProjectRate) => {
+      if (!editProject) return
+
+      const ongoing =
+        newRate ??
+        getRatesForProject(editProject.id).find((r) => r.endDate === null)
+
+      if (ongoing) {
+        const hourlyRate = ongoing.hourlyRate
+        setEditProject((p) => (p ? { ...p, hourlyRate } : null))
+        setProjects((prev) =>
+          prev.map((p) =>
+            p.id === editProject.id ? { ...p, hourlyRate } : p
+          )
+        )
+      }
+
+      void refetchRates()
+    },
+    [editProject, getRatesForProject, refetchRates, setProjects]
+  )
 
   const saveEdit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -37,7 +74,6 @@ function ManageProjectsPage() {
             project_name: editProject.projectName,
             start_date: editProject.startDate || null,
             end_date: editProject.endDate || null,
-            hourly_rate: editProject.hourlyRate,
             company_id: editProject.companyId,
           })
           .eq("id", editProject.id)
@@ -137,6 +173,17 @@ function ManageProjectsPage() {
               "",
             companyId: data.company_id as string,
           }
+
+          await supabase.from("project_rates").insert({
+            project_id: created.id,
+            start_date:
+              newProject.startDate ||
+              data.start_date ||
+              new Date().toISOString().slice(0, 10),
+            end_date: null,
+            hourly_rate: newProject.hourlyRate,
+          })
+          void refetchRates()
         }
       }
     } finally {
@@ -190,6 +237,11 @@ function ManageProjectsPage() {
         onEditClose={closeEdit}
         setEditProject={setEditProject}
         onEditSubmit={saveEdit}
+        editProjectRates={editProjectRates}
+        onInsertRate={insertRate}
+        onUpdateRate={updateRate}
+        onDeleteRate={deleteRate}
+        onRatesChanged={handleRatesChanged}
         deleteProject={deleteProject}
         deleteConfirmStep={deleteConfirmStep}
         onDeleteBackToStep1={confirmDeleteStep1}

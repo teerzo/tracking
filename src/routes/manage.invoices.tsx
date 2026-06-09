@@ -4,6 +4,7 @@ import * as React from "react"
 import { createFileRoute } from "@tanstack/react-router"
 import { useInvoices, type Invoice } from "@/lib/hooks/useInvoices"
 import { useTimeEntries } from "@/lib/hooks/useTimeEntries"
+import { useProjectRates } from "@/lib/hooks/useProjectRates"
 import { useProjects } from "@/lib/hooks/useProjects"
 import { InvoicesTable } from "@/components/invoices/invoices-table"
 import { InvoiceDialog } from "@/components/time-tracking/invoice-dialog"
@@ -31,6 +32,7 @@ function ManageInvoicesPage() {
   const { invoices, setInvoices, loading, error } = useInvoices()
   const { entries } = useTimeEntries()
   const { projects } = useProjects()
+  const { rates: projectRates } = useProjectRates()
   const today = React.useMemo(() => new Date().toISOString().slice(0, 10), [])
   const projectsForHeader = React.useMemo(
     () =>
@@ -48,6 +50,7 @@ function ManageInvoicesPage() {
   useManageHeaderAction(
     <InvoiceDialog
       projects={projectsForHeader}
+      projectRates={projectRates}
       entries={entries}
       selectedDateStr={today}
     />
@@ -106,7 +109,11 @@ function ManageInvoicesPage() {
         inv.periodStart,
         inv.periodEnd
       )
-      const summary = aggregateEntriesForInvoice(filtered, projectsForInvoice)
+      const summary = aggregateEntriesForInvoice(
+        filtered,
+        projectsForInvoice,
+        projectRates
+      )
 
       if (summary.lines.length === 0) {
         const subtotal = chargeGst
@@ -123,6 +130,7 @@ function ManageInvoicesPage() {
         })
         summary.totalHours = inv.totalHours
         summary.totalAmount = subtotal
+        summary.unmatchedEntryCount = 0
       }
 
       let userData: {
@@ -194,7 +202,7 @@ function ManageInvoicesPage() {
       })
       openInvoicePdf(html, { printAndClose: true })
     },
-    [entries, projects]
+    [entries, projects, projectRates]
   )
 
   return (

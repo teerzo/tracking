@@ -29,7 +29,12 @@ import {
 } from "@/components/ui/select"
 import { FileTextIcon } from "lucide-react"
 import { supabase } from "@/lib/supabaseClient"
-import type { Project, TimeEntry, InvoiceSummary } from "@/lib/time-tracking"
+import type {
+  Project,
+  ProjectRate,
+  TimeEntry,
+  InvoiceSummary,
+} from "@/lib/time-tracking"
 import {
   filterEntriesByDateRange,
   filterEntriesByProjects,
@@ -44,6 +49,7 @@ import { cn } from "@/lib/utils"
 
 interface InvoiceDialogProps {
   projects: Project[]
+  projectRates: ProjectRate[]
   entries: TimeEntry[]
   selectedDateStr: string
 }
@@ -52,6 +58,7 @@ const ALL_COMPANIES_VALUE = "__all__"
 
 export function InvoiceDialog({
   projects,
+  projectRates,
   entries,
   selectedDateStr,
 }: InvoiceDialogProps) {
@@ -90,8 +97,8 @@ export function InvoiceDialog({
   const summary = React.useMemo<InvoiceSummary | null>(() => {
     if (!start || !end) return null
     if (invoiceEntries.length === 0) return null
-    return aggregateEntriesForInvoice(invoiceEntries, projects)
-  }, [invoiceEntries, projects, start, end])
+    return aggregateEntriesForInvoice(invoiceEntries, projects, projectRates)
+  }, [invoiceEntries, projects, projectRates, start, end])
 
   const weeklyBreakdown = React.useMemo(() => {
     if (invoiceEntries.length === 0) return [] as { weekStart: string; days: number[] }[]
@@ -380,6 +387,13 @@ export function InvoiceDialog({
             <h3 className="mb-3 font-medium">Invoice preview</h3>
             {summary ? (
               <>
+                {summary.unmatchedEntryCount > 0 ? (
+                  <p className="text-destructive mb-3 text-sm">
+                    {summary.unmatchedEntryCount} time{" "}
+                    {summary.unmatchedEntryCount === 1 ? "entry has" : "entries have"}{" "}
+                    no matching rate period and used the project&apos;s fallback rate.
+                  </p>
+                ) : null}
                 <div className="overflow-x-auto">
                   <table
                     className={cn(
@@ -398,7 +412,10 @@ export function InvoiceDialog({
                     </thead>
                     <tbody>
                       {summary.lines.map((line) => (
-                        <tr key={line.projectId} className="border-t">
+                        <tr
+                          key={`${line.projectId}-${line.hourlyRate}`}
+                          className="border-t"
+                        >
                           <td>{line.projectName}</td>
                           <td>{formatCurrency(line.hourlyRate)}/hr</td>
                           <td>{formatHours(line.hours)}</td>
